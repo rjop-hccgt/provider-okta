@@ -1,0 +1,20 @@
+apiVersion: idp.okta.upbound.io/v1alpha1
+kind: SAML
+metadata:
+  annotations:
+    meta.upbound.io/example-id: idp/v1alpha1/saml
+  labels:
+    testing.upbound.io/example-name: example
+  name: example
+spec:
+  forProvider:
+    acsType: INSTANCE
+    issuer: https://idp.example.com
+    kid: ${okta_idp_saml_key.test.id}
+    name: testAcc_replace_with_uuid
+    requestSignatureScope: REQUEST
+    responseSignatureScope: ANY
+    ssoBinding: HTTP-POST
+    ssoDestination: https://idp.example.com
+    ssoUrl: https://idp.example.com
+    usernameTemplate: idpuser.email

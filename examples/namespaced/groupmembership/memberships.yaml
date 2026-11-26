@@ -1,0 +1,14 @@
+apiVersion: groupmembership.okta.m.upbound.io/v1alpha1
+kind: Memberships
+metadata:
+  name: example-group-membership
+  namespace: crossplane-system
+spec:
+  forProvider:
+    groupIdRef:
+      name: example-group
+    usersRefs:
+      - name: "example-user"
+  providerConfigRef:
+    kind: ClusterProviderConfig
+    name: default

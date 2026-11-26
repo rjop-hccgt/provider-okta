@@ -1,0 +1,15 @@
+apiVersion: app.okta.upbound.io/v1alpha1
+kind: OauthAPIScope
+metadata:
+  annotations:
+    meta.upbound.io/example-id: app/v1alpha1/oauthapiscope
+  labels:
+    testing.upbound.io/example-name: example
+  name: example
+spec:
+  forProvider:
+    appId: <application_id>
+    issuer: <your org domain>
+    scopes:
+    - okta.users.read
+    - okta.users.manage

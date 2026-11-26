@@ -1,0 +1,18 @@
+apiVersion: auth.okta.upbound.io/v1alpha1
+kind: ServerClaim
+metadata:
+  annotations:
+    meta.upbound.io/example-id: auth/v1alpha1/serverclaim
+  labels:
+    testing.upbound.io/example-name: example
+  name: example
+spec:
+  forProvider:
+    authServerIdSelector:
+      matchLabels:
+        testing.upbound.io/example-name: example
+    claimType: IDENTITY
+    name: staff
+    scopes:
+    - ${okta_auth_server_scope.example.name}
+    value: String.substringAfter(user.email, "@") == "example.com"

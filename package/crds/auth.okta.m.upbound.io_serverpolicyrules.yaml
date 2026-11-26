@@ -1,0 +1,846 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.20.1
+  name: serverpolicyrules.auth.okta.m.upbound.io
+spec:
+  group: auth.okta.m.upbound.io
+  names:
+    categories:
+    - crossplane
+    - managed
+    - okta
+    kind: ServerPolicyRule
+    listKind: ServerPolicyRuleList
+    plural: serverpolicyrules
+    singular: serverpolicyrule
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .status.conditions[?(@.type=='Synced')].status
+      name: SYNCED
+      type: string
+    - jsonPath: .status.conditions[?(@.type=='Ready')].status
+      name: READY
+      type: string
+    - jsonPath: .metadata.annotations.crossplane\.io/external-name
+      name: EXTERNAL-NAME
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: AGE
+      type: date
+    name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: ServerPolicyRule is the Schema for the ServerPolicyRules API.
+          Creates an Authorization Server Policy Rule.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: ServerPolicyRuleSpec defines the desired state of ServerPolicyRule
+            properties:
+              forProvider:
+                properties:
+                  accessTokenLifetimeMinutes:
+                    description: |-
+                      Lifetime of access token. Can be set to a value between 5 and 1440 minutes. Default is 60.
+                      Lifetime of access token. Can be set to a value between 5 and 1440 minutes. Default is `60`.
+                    type: number
+                  authServerId:
+                    description: |-
+                      Auth Server ID.
+                      Auth server ID
+                    type: string
+                  authServerIdRef:
+                    description: Reference to a Server in auth to populate authServerId.
+                    properties:
+                      name:
+                        description: Name of the referenced object.
+                        type: string
+                      namespace:
+                        description: Namespace of the referenced object
+                        type: string
+                      policy:
+                        description: Policies for referencing.
+                        properties:
+                          resolution:
+                            default: Required
+                            description: |-
+                              Resolution specifies whether resolution of this reference is required.
+                              The default is 'Required', which means the reconcile will fail if the
+                              reference cannot be resolved. 'Optional' means this reference will be
+                              a no-op if it cannot be resolved.
+                            enum:
+                            - Required
+                            - Optional
+                            type: string
+                          resolve:
+                            description: |-
+                              Resolve specifies when this reference should be resolved. The default
+                              is 'IfNotPresent', which will attempt to resolve the reference only when
+                              the corresponding field is not present. Use 'Always' to resolve the
+                              reference on every reconcile.
+                            enum:
+                            - Always
+                            - IfNotPresent
+                            type: string
+                        type: object
+                    required:
+                    - name
+                    type: object
+                  authServerIdSelector:
+                    description: Selector for a Server in auth to populate authServerId.
+                    properties:
+                      matchControllerRef:
+                        description: |-
+                          MatchControllerRef ensures an object with the same controller reference
+                          as the selecting object is selected.
+                        type: boolean
+                      matchLabels:
+                        additionalProperties:
+                          type: string
+                        description: MatchLabels ensures an object with matching labels
+                          is selected.
+                        type: object
+                      namespace:
+                        description: Namespace for the selector
+                        type: string
+                      policy:
+                        description: Policies for selection.
+                        properties:
+                          resolution:
+                            default: Required
+                            description: |-
+                              Resolution specifies whether resolution of this reference is required.
+                              The default is 'Required', which means the reconcile will fail if the
+                              reference cannot be resolved. 'Optional' means this reference will be
+                              a no-op if it cannot be resolved.
+                            enum:
+                            - Required
+                            - Optional
+                            type: string
+                          resolve:
+                            description: |-
+                              Resolve specifies when this reference should be resolved. The default
+                              is 'IfNotPresent', which will attempt to resolve the reference only when
+                              the corresponding field is not present. Use 'Always' to resolve the
+                              reference on every reconcile.
+                            enum:
+                            - Always
+                            - IfNotPresent
+                            type: string
+                        type: object
+                    type: object
+                  grantTypeWhitelist:
+                    description: |-
+                      Accepted grant type values, "authorization_code", "implicit", "password", "client_credentials",
+                      "urn:ietf:params:oauth:grant-type:saml2-bearer" (Early Access Property), "urn:ietf:params:oauth:grant-type:token-exchange" (Early Access Property),
+                      "urn:ietf:params:oauth:grant-type:device_code" (Early Access Property), "interaction_code" (OIE only). For "implicit" value either user_whitelist or group_whitelist should be set.
+                      Accepted grant type values: authorization_code, implicit, password, client_credentials
+                    items:
+                      type: string
+                    type: array
+                    x-kubernetes-list-type: set
+                  groupBlacklist:
+                    description: |-
+                      Specifies a set of Groups whose Users are to be excluded.
+                      Specifies a set of Groups whose Users are to be excluded.
+                    items:
+                      type: string
+                    type: array
+                    x-kubernetes-list-type: set
+                  groupWhitelist:
+                    description: |-
+                      Specifies a set of Groups whose Users are to be included. Can be set to Group ID or to the following: "EVERYONE".
+                      Specifies a set of Groups whose Users are to be included. Can be set to Group ID or to the following: `EVERYONE`.
+                    items:
+                      type: string
+                    type: array
+                    x-kubernetes-list-type: set
+                  inlineHookId:
+                    description: |-
+                      The ID of the inline token to trigger.
+                      The ID of the inline token to trigger.
+                    type: string
+                  name:
+                    description: |-
+                      Auth Server Policy Rule name.
+                      Auth server policy rule name
+                    type: string
+                  policyId:
+                    description: |-
+                      Auth Server Policy ID.
+                      Auth server policy ID
+                    type: string
+                  policyIdRef:
+                    description: Reference to a ServerPolicy in auth to populate policyId.
+                    properties:
+                      name:
+                        description: Name of the referenced object.
+                        type: string
+                      namespace:
+                        description: Namespace of the referenced object
+                        type: string
+                      policy:
+                        description: Policies for referencing.
+                        properties:
+                          resolution:
+                            default: Required
+                            description: |-
+                              Resolution specifies whether resolution of this reference is required.
+                              The default is 'Required', which means the reconcile will fail if the
+                              reference cannot be resolved. 'Optional' means this reference will be
+                              a no-op if it cannot be resolved.
+                            enum:
+                            - Required
+                            - Optional
+                            type: string
+                          resolve:
+                            description: |-
+                              Resolve specifies when this reference should be resolved. The default
+                              is 'IfNotPresent', which will attempt to resolve the reference only when
+                              the corresponding field is not present. Use 'Always' to resolve the
+                              reference on every reconcile.
+                            enum:
+                            - Always
+                            - IfNotPresent
+                            type: string
+                        type: object
+                    required:
+                    - name
+                    type: object
+                  policyIdSelector:
+                    description: Selector for a ServerPolicy in auth to populate policyId.
+                    properties:
+                      matchControllerRef:
+                        description: |-
+                          MatchControllerRef ensures an object with the same controller reference
+                          as the selecting object is selected.
+                        type: boolean
+                      matchLabels:
+                        additionalProperties:
+                          type: string
+                        description: MatchLabels ensures an object with matching labels
+                          is selected.
+                        type: object
+                      namespace:
+                        description: Namespace for the selector
+                        type: string
+                      policy:
+                        description: Policies for selection.
+                        properties:
+                          resolution:
+                            default: Required
+                            description: |-
+                              Resolution specifies whether resolution of this reference is required.
+                              The default is 'Required', which means the reconcile will fail if the
+                              reference cannot be resolved. 'Optional' means this reference will be
+                              a no-op if it cannot be resolved.
+                            enum:
+                            - Required
+                            - Optional
+                            type: string
+                          resolve:
+                            description: |-
+                              Resolve specifies when this reference should be resolved. The default
+                              is 'IfNotPresent', which will attempt to resolve the reference only when
+                              the corresponding field is not present. Use 'Always' to resolve the
+                              reference on every reconcile.
+                            enum:
+                            - Always
+                            - IfNotPresent
+                            type: string
+                        type: object
+                    type: object
+                  priority:
+                    description: |-
+                      Priority of the auth server policy rule.
+                      Priority of the auth server policy rule
+                    type: number
+                  refreshTokenLifetimeMinutes:
+                    description: |-
+                      Lifetime of refresh token.
+                      Lifetime of refresh token.
+                    type: number
+                  refreshTokenWindowMinutes:
+                    description: |-
+                      Window in which a refresh token can be used. It can be a value between 5 and 2628000 (5 years) minutes. Default is 10080 (7 days).
+                      "refresh_token_window_minutes" must be between "access_token_lifetime_minutes" and "refresh_token_lifetime_minutes".
+                      Window in which a refresh token can be used. It can be a value between 5 and 2628000 (5 years) minutes. Default is `10080` (7 days).`refresh_token_window_minutes` must be between `access_token_lifetime_minutes` and `refresh_token_lifetime_minutes`.
+                    type: number
+                  scopeWhitelist:
+                    description: |-
+                      Scopes allowed for this policy rule. They can be whitelisted by name or all can be whitelisted with "*".
+                      Scopes allowed for this policy rule. They can be whitelisted by name or all can be whitelisted with ` * `
+                    items:
+                      type: string
+                    type: array
+                    x-kubernetes-list-type: set
+                  status:
+                    description: The status of the Auth Server Policy Rule.
+                    type: string
+                  type:
+                    description: |-
+                      The type of the Auth Server Policy Rule.
+                      Auth server policy rule type, unlikely this will be anything other then the default
+                    type: string
+                  userBlacklist:
+                    description: |-
+                      Specifies a set of Users to be excluded.
+                      Specifies a set of Users to be excluded.
+                    items:
+                      type: string
+                    type: array
+                    x-kubernetes-list-type: set
+                  userWhitelist:
+                    description: |-
+                      Specifies a set of Users to be included.
+                      Specifies a set of Users to be included.
+                    items:
+                      type: string
+                    type: array
+                    x-kubernetes-list-type: set
+                type: object
+              initProvider:
+                description: |-
+                  THIS IS A BETA FIELD. It will be honored
+                  unless the Management Policies feature flag is disabled.
+                  InitProvider holds the same fields as ForProvider, with the exception
+                  of Identifier and other resource reference fields. The fields that are
+                  in InitProvider are merged into ForProvider when the resource is created.
+                  The same fields are also added to the terraform ignore_changes hook, to
+                  avoid updating them after creation. This is useful for fields that are
+                  required on creation, but we do not desire to update them after creation,
+                  for example because of an external controller is managing them, like an
+                  autoscaler.
+                properties:
+                  accessTokenLifetimeMinutes:
+                    description: |-
+                      Lifetime of access token. Can be set to a value between 5 and 1440 minutes. Default is 60.
+                      Lifetime of access token. Can be set to a value between 5 and 1440 minutes. Default is `60`.
+                    type: number
+                  authServerId:
+                    description: |-
+                      Auth Server ID.
+                      Auth server ID
+                    type: string
+                  authServerIdRef:
+                    description: Reference to a Server in auth to populate authServerId.
+                    properties:
+                      name:
+                        description: Name of the referenced object.
+                        type: string
+                      namespace:
+                        description: Namespace of the referenced object
+                        type: string
+                      policy:
+                        description: Policies for referencing.
+                        properties:
+                          resolution:
+                            default: Required
+                            description: |-
+                              Resolution specifies whether resolution of this reference is required.
+                              The default is 'Required', which means the reconcile will fail if the
+                              reference cannot be resolved. 'Optional' means this reference will be
+                              a no-op if it cannot be resolved.
+                            enum:
+                            - Required
+                            - Optional
+                            type: string
+                          resolve:
+                            description: |-
+                              Resolve specifies when this reference should be resolved. The default
+                              is 'IfNotPresent', which will attempt to resolve the reference only when
+                              the corresponding field is not present. Use 'Always' to resolve the
+                              reference on every reconcile.
+                            enum:
+                            - Always
+                            - IfNotPresent
+                            type: string
+                        type: object
+                    required:
+                    - name
+                    type: object
+                  authServerIdSelector:
+                    description: Selector for a Server in auth to populate authServerId.
+                    properties:
+                      matchControllerRef:
+                        description: |-
+                          MatchControllerRef ensures an object with the same controller reference
+                          as the selecting object is selected.
+                        type: boolean
+                      matchLabels:
+                        additionalProperties:
+                          type: string
+                        description: MatchLabels ensures an object with matching labels
+                          is selected.
+                        type: object
+                      namespace:
+                        description: Namespace for the selector
+                        type: string
+                      policy:
+                        description: Policies for selection.
+                        properties:
+                          resolution:
+                            default: Required
+                            description: |-
+                              Resolution specifies whether resolution of this reference is required.
+                              The default is 'Required', which means the reconcile will fail if the
+                              reference cannot be resolved. 'Optional' means this reference will be
+                              a no-op if it cannot be resolved.
+                            enum:
+                            - Required
+                            - Optional
+                            type: string
+                          resolve:
+                            description: |-
+                              Resolve specifies when this reference should be resolved. The default
+                              is 'IfNotPresent', which will attempt to resolve the reference only when
+                              the corresponding field is not present. Use 'Always' to resolve the
+                              reference on every reconcile.
+                            enum:
+                            - Always
+                            - IfNotPresent
+                            type: string
+                        type: object
+                    type: object
+                  grantTypeWhitelist:
+                    description: |-
+                      Accepted grant type values, "authorization_code", "implicit", "password", "client_credentials",
+                      "urn:ietf:params:oauth:grant-type:saml2-bearer" (Early Access Property), "urn:ietf:params:oauth:grant-type:token-exchange" (Early Access Property),
+                      "urn:ietf:params:oauth:grant-type:device_code" (Early Access Property), "interaction_code" (OIE only). For "implicit" value either user_whitelist or group_whitelist should be set.
+                      Accepted grant type values: authorization_code, implicit, password, client_credentials
+                    items:
+                      type: string
+                    type: array
+                    x-kubernetes-list-type: set
+                  groupBlacklist:
+                    description: |-
+                      Specifies a set of Groups whose Users are to be excluded.
+                      Specifies a set of Groups whose Users are to be excluded.
+                    items:
+                      type: string
+                    type: array
+                    x-kubernetes-list-type: set
+                  groupWhitelist:
+                    description: |-
+                      Specifies a set of Groups whose Users are to be included. Can be set to Group ID or to the following: "EVERYONE".
+                      Specifies a set of Groups whose Users are to be included. Can be set to Group ID or to the following: `EVERYONE`.
+                    items:
+                      type: string
+                    type: array
+                    x-kubernetes-list-type: set
+                  inlineHookId:
+                    description: |-
+                      The ID of the inline token to trigger.
+                      The ID of the inline token to trigger.
+                    type: string
+                  name:
+                    description: |-
+                      Auth Server Policy Rule name.
+                      Auth server policy rule name
+                    type: string
+                  policyId:
+                    description: |-
+                      Auth Server Policy ID.
+                      Auth server policy ID
+                    type: string
+                  policyIdRef:
+                    description: Reference to a ServerPolicy in auth to populate policyId.
+                    properties:
+                      name:
+                        description: Name of the referenced object.
+                        type: string
+                      namespace:
+                        description: Namespace of the referenced object
+                        type: string
+                      policy:
+                        description: Policies for referencing.
+                        properties:
+                          resolution:
+                            default: Required
+                            description: |-
+                              Resolution specifies whether resolution of this reference is required.
+                              The default is 'Required', which means the reconcile will fail if the
+                              reference cannot be resolved. 'Optional' means this reference will be
+                              a no-op if it cannot be resolved.
+                            enum:
+                            - Required
+                            - Optional
+                            type: string
+                          resolve:
+                            description: |-
+                              Resolve specifies when this reference should be resolved. The default
+                              is 'IfNotPresent', which will attempt to resolve the reference only when
+                              the corresponding field is not present. Use 'Always' to resolve the
+                              reference on every reconcile.
+                            enum:
+                            - Always
+                            - IfNotPresent
+                            type: string
+                        type: object
+                    required:
+                    - name
+                    type: object
+                  policyIdSelector:
+                    description: Selector for a ServerPolicy in auth to populate policyId.
+                    properties:
+                      matchControllerRef:
+                        description: |-
+                          MatchControllerRef ensures an object with the same controller reference
+                          as the selecting object is selected.
+                        type: boolean
+                      matchLabels:
+                        additionalProperties:
+                          type: string
+                        description: MatchLabels ensures an object with matching labels
+                          is selected.
+                        type: object
+                      namespace:
+                        description: Namespace for the selector
+                        type: string
+                      policy:
+                        description: Policies for selection.
+                        properties:
+                          resolution:
+                            default: Required
+                            description: |-
+                              Resolution specifies whether resolution of this reference is required.
+                              The default is 'Required', which means the reconcile will fail if the
+                              reference cannot be resolved. 'Optional' means this reference will be
+                              a no-op if it cannot be resolved.
+                            enum:
+                            - Required
+                            - Optional
+                            type: string
+                          resolve:
+                            description: |-
+                              Resolve specifies when this reference should be resolved. The default
+                              is 'IfNotPresent', which will attempt to resolve the reference only when
+                              the corresponding field is not present. Use 'Always' to resolve the
+                              reference on every reconcile.
+                            enum:
+                            - Always
+                            - IfNotPresent
+                            type: string
+                        type: object
+                    type: object
+                  priority:
+                    description: |-
+                      Priority of the auth server policy rule.
+                      Priority of the auth server policy rule
+                    type: number
+                  refreshTokenLifetimeMinutes:
+                    description: |-
+                      Lifetime of refresh token.
+                      Lifetime of refresh token.
+                    type: number
+                  refreshTokenWindowMinutes:
+                    description: |-
+                      Window in which a refresh token can be used. It can be a value between 5 and 2628000 (5 years) minutes. Default is 10080 (7 days).
+                      "refresh_token_window_minutes" must be between "access_token_lifetime_minutes" and "refresh_token_lifetime_minutes".
+                      Window in which a refresh token can be used. It can be a value between 5 and 2628000 (5 years) minutes. Default is `10080` (7 days).`refresh_token_window_minutes` must be between `access_token_lifetime_minutes` and `refresh_token_lifetime_minutes`.
+                    type: number
+                  scopeWhitelist:
+                    description: |-
+                      Scopes allowed for this policy rule. They can be whitelisted by name or all can be whitelisted with "*".
+                      Scopes allowed for this policy rule. They can be whitelisted by name or all can be whitelisted with ` * `
+                    items:
+                      type: string
+                    type: array
+                    x-kubernetes-list-type: set
+                  status:
+                    description: The status of the Auth Server Policy Rule.
+                    type: string
+                  type:
+                    description: |-
+                      The type of the Auth Server Policy Rule.
+                      Auth server policy rule type, unlikely this will be anything other then the default
+                    type: string
+                  userBlacklist:
+                    description: |-
+                      Specifies a set of Users to be excluded.
+                      Specifies a set of Users to be excluded.
+                    items:
+                      type: string
+                    type: array
+                    x-kubernetes-list-type: set
+                  userWhitelist:
+                    description: |-
+                      Specifies a set of Users to be included.
+                      Specifies a set of Users to be included.
+                    items:
+                      type: string
+                    type: array
+                    x-kubernetes-list-type: set
+                type: object
+              managementPolicies:
+                default:
+                - '*'
+                description: |-
+                  THIS IS A BETA FIELD. It is on by default but can be opted out
+                  through a Crossplane feature flag.
+                  ManagementPolicies specify the array of actions Crossplane is allowed to
+                  take on the managed and external resources.
+                  See the design doc for more information: https://github.com/crossplane/crossplane/blob/499895a25d1a1a0ba1604944ef98ac7a1a71f197/design/design-doc-observe-only-resources.md?plain=1#L223
+                  and this one: https://github.com/crossplane/crossplane/blob/444267e84783136daa93568b364a5f01228cacbe/design/one-pager-ignore-changes.md
+                items:
+                  description: |-
+                    A ManagementAction represents an action that the Crossplane controllers
+                    can take on an external resource.
+                  enum:
+                  - Observe
+                  - Create
+                  - Update
+                  - Delete
+                  - LateInitialize
+                  - '*'
+                  type: string
+                type: array
+              providerConfigRef:
+                default:
+                  kind: ClusterProviderConfig
+                  name: default
+                description: |-
+                  ProviderConfigReference specifies how the provider that will be used to
+                  create, observe, update, and delete this managed resource should be
+                  configured.
+                properties:
+                  kind:
+                    description: Kind of the referenced object.
+                    type: string
+                  name:
+                    description: Name of the referenced object.
+                    type: string
+                required:
+                - kind
+                - name
+                type: object
+              writeConnectionSecretToRef:
+                description: |-
+                  WriteConnectionSecretToReference specifies the namespace and name of a
+                  Secret to which any connection details for this managed resource should
+                  be written. Connection details frequently include the endpoint, username,
+                  and password required to connect to the managed resource.
+                properties:
+                  name:
+                    description: Name of the secret.
+                    type: string
+                required:
+                - name
+                type: object
+            required:
+            - forProvider
+            type: object
+            x-kubernetes-validations:
+            - message: spec.forProvider.grantTypeWhitelist is a required parameter
+              rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies
+                || ''Update'' in self.managementPolicies) || has(self.forProvider.grantTypeWhitelist)
+                || (has(self.initProvider) && has(self.initProvider.grantTypeWhitelist))'
+            - message: spec.forProvider.name is a required parameter
+              rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies
+                || ''Update'' in self.managementPolicies) || has(self.forProvider.name)
+                || (has(self.initProvider) && has(self.initProvider.name))'
+            - message: spec.forProvider.priority is a required parameter
+              rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies
+                || ''Update'' in self.managementPolicies) || has(self.forProvider.priority)
+                || (has(self.initProvider) && has(self.initProvider.priority))'
+          status:
+            description: ServerPolicyRuleStatus defines the observed state of ServerPolicyRule.
+            properties:
+              atProvider:
+                properties:
+                  accessTokenLifetimeMinutes:
+                    description: |-
+                      Lifetime of access token. Can be set to a value between 5 and 1440 minutes. Default is 60.
+                      Lifetime of access token. Can be set to a value between 5 and 1440 minutes. Default is `60`.
+                    type: number
+                  authServerId:
+                    description: |-
+                      Auth Server ID.
+                      Auth server ID
+                    type: string
+                  grantTypeWhitelist:
+                    description: |-
+                      Accepted grant type values, "authorization_code", "implicit", "password", "client_credentials",
+                      "urn:ietf:params:oauth:grant-type:saml2-bearer" (Early Access Property), "urn:ietf:params:oauth:grant-type:token-exchange" (Early Access Property),
+                      "urn:ietf:params:oauth:grant-type:device_code" (Early Access Property), "interaction_code" (OIE only). For "implicit" value either user_whitelist or group_whitelist should be set.
+                      Accepted grant type values: authorization_code, implicit, password, client_credentials
+                    items:
+                      type: string
+                    type: array
+                    x-kubernetes-list-type: set
+                  groupBlacklist:
+                    description: |-
+                      Specifies a set of Groups whose Users are to be excluded.
+                      Specifies a set of Groups whose Users are to be excluded.
+                    items:
+                      type: string
+                    type: array
+                    x-kubernetes-list-type: set
+                  groupWhitelist:
+                    description: |-
+                      Specifies a set of Groups whose Users are to be included. Can be set to Group ID or to the following: "EVERYONE".
+                      Specifies a set of Groups whose Users are to be included. Can be set to Group ID or to the following: `EVERYONE`.
+                    items:
+                      type: string
+                    type: array
+                    x-kubernetes-list-type: set
+                  id:
+                    description: The ID of the Auth Server Policy Rule.
+                    type: string
+                  inlineHookId:
+                    description: |-
+                      The ID of the inline token to trigger.
+                      The ID of the inline token to trigger.
+                    type: string
+                  name:
+                    description: |-
+                      Auth Server Policy Rule name.
+                      Auth server policy rule name
+                    type: string
+                  policyId:
+                    description: |-
+                      Auth Server Policy ID.
+                      Auth server policy ID
+                    type: string
+                  priority:
+                    description: |-
+                      Priority of the auth server policy rule.
+                      Priority of the auth server policy rule
+                    type: number
+                  refreshTokenLifetimeMinutes:
+                    description: |-
+                      Lifetime of refresh token.
+                      Lifetime of refresh token.
+                    type: number
+                  refreshTokenWindowMinutes:
+                    description: |-
+                      Window in which a refresh token can be used. It can be a value between 5 and 2628000 (5 years) minutes. Default is 10080 (7 days).
+                      "refresh_token_window_minutes" must be between "access_token_lifetime_minutes" and "refresh_token_lifetime_minutes".
+                      Window in which a refresh token can be used. It can be a value between 5 and 2628000 (5 years) minutes. Default is `10080` (7 days).`refresh_token_window_minutes` must be between `access_token_lifetime_minutes` and `refresh_token_lifetime_minutes`.
+                    type: number
+                  scopeWhitelist:
+                    description: |-
+                      Scopes allowed for this policy rule. They can be whitelisted by name or all can be whitelisted with "*".
+                      Scopes allowed for this policy rule. They can be whitelisted by name or all can be whitelisted with ` * `
+                    items:
+                      type: string
+                    type: array
+                    x-kubernetes-list-type: set
+                  status:
+                    description: The status of the Auth Server Policy Rule.
+                    type: string
+                  system:
+                    description: |-
+                      The rule is the system (default) rule for its associated policy.
+                      The rule is the system (default) rule for its associated policy
+                    type: boolean
+                  type:
+                    description: |-
+                      The type of the Auth Server Policy Rule.
+                      Auth server policy rule type, unlikely this will be anything other then the default
+                    type: string
+                  userBlacklist:
+                    description: |-
+                      Specifies a set of Users to be excluded.
+                      Specifies a set of Users to be excluded.
+                    items:
+                      type: string
+                    type: array
+                    x-kubernetes-list-type: set
+                  userWhitelist:
+                    description: |-
+                      Specifies a set of Users to be included.
+                      Specifies a set of Users to be included.
+                    items:
+                      type: string
+                    type: array
+                    x-kubernetes-list-type: set
+                type: object
+              conditions:
+                description: Conditions of the resource.
+                items:
+                  description: A Condition that may apply to a resource.
+                  properties:
+                    lastTransitionTime:
+                      description: |-
+                        LastTransitionTime is the last time this condition transitioned from one
+                        status to another.
+                      format: date-time
+                      type: string
+                    message:
+                      description: |-
+                        A Message containing details about this condition's last transition from
+                        one status to another, if any.
+                      type: string
+                    observedGeneration:
+                      description: |-
+                        ObservedGeneration represents the .metadata.generation that the condition was set based upon.
+                        For instance, if .metadata.generation is currently 12, but the .status.conditions[x].observedGeneration is 9, the condition is out of date
+                        with respect to the current state of the instance.
+                      format: int64
+                      type: integer
+                    reason:
+                      description: A Reason for this condition's last transition from
+                        one status to another.
+                      type: string
+                    status:
+                      description: Status of this condition; is it currently True,
+                        False, or Unknown?
+                      type: string
+                    type:
+                      description: |-
+                        Type of this condition. At most one of each condition type may apply to
+                        a resource at any point in time.
+                      type: string
+                  required:
+                  - lastTransitionTime
+                  - reason
+                  - status
+                  - type
+                  type: object
+                type: array
+                x-kubernetes-list-map-keys:
+                - type
+                x-kubernetes-list-type: map
+              lastHandledReconcileAt:
+                description: |-
+                  LastHandledReconcileAt holds the value of the most recent
+                  reconcile-requested-at annotation token that the controller has
+                  processed. Users can compare this to the annotation to determine
+                  whether a reconcile request has been handled.
+                type: string
+              observedGeneration:
+                description: |-
+                  ObservedGeneration is the latest metadata.generation
+                  which resulted in either a ready state, or stalled due to error
+                  it can not recover from without human intervention.
+                format: int64
+                type: integer
+            type: object
+        required:
+        - spec
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

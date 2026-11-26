@@ -1,0 +1,16 @@
+apiVersion: okta.okta.m.upbound.io/v1alpha1
+kind: Behavior
+metadata:
+  annotations:
+    meta.upbound.io/example-id: okta/v1alpha1/behavior
+  labels:
+    testing.upbound.io/example-name: my_location
+  name: my-location
+  namespace: crossplane-system
+spec:
+  forProvider:
+    locationGranularityType: LAT_LONG
+    name: My Location
+    numberOfAuthentications: 50
+    radiusFromLocation: 20
+    type: ANOMALOUS_LOCATION

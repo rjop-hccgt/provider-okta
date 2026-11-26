@@ -1,0 +1,13 @@
+apiVersion: auth.okta.upbound.io/v1alpha1
+kind: ServerDefault
+metadata:
+  annotations:
+    meta.upbound.io/example-id: auth/v1alpha1/serverdefault
+  labels:
+    testing.upbound.io/example-name: example
+  name: example
+spec:
+  forProvider:
+    audiences:
+    - api://default
+    description: Default Authorization Server for your Applications
