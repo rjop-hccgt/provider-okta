@@ -1,0 +1,13 @@
+apiVersion: app.okta.m.upbound.io/v1alpha1
+kind: AccessPolicyAssignment
+metadata:
+  annotations:
+    meta.upbound.io/example-id: app/v1alpha1/accesspolicyassignment
+  labels:
+    testing.upbound.io/example-name: assignment
+  name: assignment
+  namespace: crossplane-system
+spec:
+  forProvider:
+    appId: ${data.okta_app.example.id}
+    policyId: ${data.okta_policy.access.id}

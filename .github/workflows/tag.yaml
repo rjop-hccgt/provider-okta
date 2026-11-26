@@ -1,7 +1,7 @@
 name: Tag
 
 on:
-  workflow_dispatch:
+  workflow_dispatch: 
     inputs:
       version:
         description: 'Release version (e.g. v0.1.0)'
@@ -12,7 +12,7 @@ on:
 
 jobs:
   tag:
-    uses: upbound/uptest/.github/workflows/provider-tag.yml@main
+    uses: crossplane-contrib/provider-workflows/.github/workflows/tag.yml@d8bb2978c8987635b2fddb5bd9c2868bd14117b0 # main
     with:
       version: ${{ github.event.inputs.version }}
       message: ${{ github.event.inputs.message }}

@@ -1,0 +1,13 @@
+apiVersion: okta.m.upbound.io/v1beta1
+kind: ProviderConfig
+metadata:
+  name: default
+  namespace: crossplane-system
+spec:
+  credentials:
+    source: Secret
+    # A namespaced ProviderConfig always reads the secret from the managed
+    # resource's namespace.
+    secretRef:
+      name: example-creds
+      key: credentials

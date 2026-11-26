@@ -1,0 +1,16 @@
+apiVersion: auth.okta.upbound.io/v1alpha1
+kind: ServerScope
+metadata:
+  annotations:
+    meta.upbound.io/example-id: auth/v1alpha1/serverscope
+  labels:
+    testing.upbound.io/example-name: example
+  name: example
+spec:
+  forProvider:
+    authServerIdSelector:
+      matchLabels:
+        testing.upbound.io/example-name: example
+    consent: IMPLICIT
+    metadataPublish: NO_CLIENTS
+    name: example

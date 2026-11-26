@@ -1,0 +1,16 @@
+apiVersion: auth.okta.upbound.io/v1alpha1
+kind: Server
+metadata:
+  annotations:
+    meta.upbound.io/example-id: auth/v1alpha1/server
+  labels:
+    testing.upbound.io/example-name: example
+  name: example
+spec:
+  forProvider:
+    audiences:
+    - api://example
+    description: My Example Auth Server
+    issuerMode: CUSTOM_URL
+    name: example
+    status: ACTIVE

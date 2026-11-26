@@ -1,0 +1,23 @@
+apiVersion: auth.okta.upbound.io/v1alpha1
+kind: ServerPolicyRule
+metadata:
+  annotations:
+    meta.upbound.io/example-id: auth/v1alpha1/serverpolicyrule
+  labels:
+    testing.upbound.io/example-name: example
+  name: example
+spec:
+  forProvider:
+    authServerIdSelector:
+      matchLabels:
+        testing.upbound.io/example-name: example
+    grantTypeWhitelist:
+    - implicit
+    groupWhitelist:
+    - <group ids>
+    name: example
+    policyIdSelector:
+      matchLabels:
+        testing.upbound.io/example-name: example
+    priority: 1
+    status: ACTIVE

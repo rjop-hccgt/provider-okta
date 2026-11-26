@@ -1,10 +1,20 @@
 name: okta/okta
 resources:
-    okta_admin_role_custom':
+    okta_admin_role_custom:
         subCategory: ""
         description: Manages custom roles.
-        name: okta_admin_role_custom'
+        name: okta_admin_role_custom
         title: okta_admin_role_custom'
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "description": "This role allows app assignment management",
+                  "label": "AppAssignmentManager",
+                  "permissions": [
+                    "okta.apps.assignment.manage"
+                  ]
+                }
         argumentDocs:
             description: '- (Required) A human-readable description of the new Role.'
             id: '- Custom Role ID'
@@ -44,11 +54,65 @@ resources:
                 "okta.users.userprofile.manage",
                 "okta.workflows.invoke".,
         importStatements: []
-    okta_admin_role_custom_assignments':
+    okta_admin_role_custom_assignments:
         subCategory: ""
         description: Manages custom roles assignments
-        name: okta_admin_role_custom_assignments'
+        name: okta_admin_role_custom_assignments
         title: okta_admin_role_custom_assignments'
+        examples:
+            - name: test
+              manifest: |-
+                {
+                  "custom_role_id": "${okta_admin_role_custom.test.id}",
+                  "members": [
+                    "${format(\"%s/api/v1/users/%s\", local.org_url, okta_user.test.id)}",
+                    "${format(\"%s/api/v1/groups/%s\", local.org_url, okta_group.test.id)}"
+                  ],
+                  "resource_set_id": "${okta_resource_set.test.id}"
+                }
+              references:
+                custom_role_id: okta_admin_role_custom.test.id
+                resource_set_id: okta_resource_set.test.id
+              dependencies:
+                okta_admin_role_custom.test: |-
+                    {
+                      "description": "Manage apps assignments and users",
+                      "label": "SomeUsersAndApps",
+                      "permissions": [
+                        "okta.apps.assignment.manage",
+                        "okta.users.manage",
+                        "okta.apps.manage"
+                      ]
+                    }
+                okta_app_swa.test: |-
+                    {
+                      "button_field": "btn-login",
+                      "label": "My SWA App",
+                      "password_field": "txtbox-password",
+                      "url": "https://example.com/login.html",
+                      "username_field": "txtbox-username"
+                    }
+                okta_group.test: |-
+                    {
+                      "description": "General Group",
+                      "name": "General"
+                    }
+                okta_resource_set.test: |-
+                    {
+                      "description": "All the users and SWA app",
+                      "label": "UsersWithApp",
+                      "resources": [
+                        "${format(\"%s/api/v1/users\", local.org_url)}",
+                        "${format(\"%s/api/v1/apps/%s\", local.org_url, okta_app_swa.test.id)}"
+                      ]
+                    }
+                okta_user.test: |-
+                    {
+                      "email": "no-reply@caladan.planet",
+                      "first_name": "Paul",
+                      "last_name": "Atreides",
+                      "login": "no-reply@caladan.planet"
+                    }
         argumentDocs:
             custom_role_id: '- (Required) ID of the Custom Role.'
             id: '- ID of this resource in resource_set_id/custom_role_id format.'
@@ -57,11 +121,22 @@ resources:
                 permission must be specified when creating custom role.
             resource_set_id: '- (Required) ID of the target Resource Set.'
         importStatements: []
-    okta_admin_role_targets':
+    okta_admin_role_targets:
         subCategory: ""
         description: Manages targets for administrator roles.
-        name: okta_admin_role_targets'
+        name: okta_admin_role_targets
         title: okta_admin_role_targets'
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "apps": [
+                    "oidc_client.\u003capp_id\u003e",
+                    "facebook"
+                  ],
+                  "role_type": "APP_ADMIN",
+                  "user_id": "\u003cuser_id\u003e"
+                }
         argumentDocs:
             apps: '- (Optional) List of app names (name represents set of app instances) or a combination of app name and app instance ID (like ''salesforce'' or ''facebook.0oapsqQ6dv19pqyEo0g3'').'
             groups: (Optional) List of group IDs. Conflicts with apps.
@@ -69,21 +144,49 @@ resources:
             role_type: '- (Required) Name of the role associated with the user. See API Docs.'
             user_id: '- (Required) ID of the user.'
         importStatements: []
-    okta_app_access_policy_assignment':
+    okta_app_access_policy_assignment:
         subCategory: ""
         description: Assigns an access policy to an application.
-        name: okta_app_access_policy_assignment'
+        name: okta_app_access_policy_assignment
         title: okta_app_access_policy_assignment'
+        examples:
+            - name: assignment
+              manifest: |-
+                {
+                  "app_id": "${data.okta_app.example.id}",
+                  "policy_id": "${data.okta_policy.access.id}"
+                }
+              references:
+                app_id: data.okta_app.example.id
+                policy_id: data.okta_policy.access.id
         argumentDocs:
             app_id: '- (Required) The application ID; this value is immutable and can not be updated.'
             id: '- The ID of the resource. This ID is simply the application ID.'
             policy_id: '- (Required) The access policy ID.'
         importStatements: []
-    okta_app_auto_login':
+    okta_app_auto_login:
         subCategory: ""
         description: Creates an Auto Login Okta Application.
-        name: okta_app_auto_login'
+        name: okta_app_auto_login
         title: okta_app_auto_login'
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "credentials_scheme": "EDIT_USERNAME_AND_PASSWORD",
+                  "label": "Example App",
+                  "reveal_password": true,
+                  "sign_on_redirect_url": "https://example.com",
+                  "sign_on_url": "https://example.com/login.html"
+                }
+            - name: example
+              manifest: |-
+                {
+                  "app_settings_json": "{\n    \"domain\": \"okta\",\n    \"afwOnly\": false\n}\n",
+                  "label": "Google Example App",
+                  "preconfigured_app": "google",
+                  "status": "ACTIVE"
+                }
         argumentDocs:
             accessibility_error_redirect_url: '- (Optional) Custom error page URL.'
             accessibility_login_redirect_url: '- (Optional) Custom login page for this application.'
@@ -150,11 +253,18 @@ resources:
             timeouts.update: '- Update timeout (default 1 hour).'
             url: '- (Required) The URL of the sign-in page for this app.'
         importStatements: []
-    okta_app_bookmark':
+    okta_app_bookmark:
         subCategory: ""
         description: Creates a Bookmark Application.
-        name: okta_app_bookmark'
+        name: okta_app_bookmark
         title: okta_app_bookmark'
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "label": "Example",
+                  "url": "https://example.com"
+                }
         argumentDocs:
             accessibility_error_redirect_url: '- (Optional) Custom error page URL.'
             accessibility_login_redirect_url: '- (Optional) Custom login page for this application.'
@@ -177,11 +287,19 @@ resources:
             timeouts.update: '- Update timeout (default 1 hour).'
             url: '- (Optional) The URL of the bookmark.'
         importStatements: []
-    okta_app_group_assignment':
+    okta_app_group_assignment:
         subCategory: ""
         description: Assigns a group to an application.
-        name: okta_app_group_assignment'
+        name: okta_app_group_assignment
         title: okta_app_group_assignment'
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "app_id": "\u003capp id\u003e",
+                  "group_id": "\u003cgroup id\u003e",
+                  "profile": "{\n  \"\u003capp_profile_field\u003e\": \"\u003cvalue\u003e\"\n}\n"
+                }
         argumentDocs:
             app_id: '- (Required) The ID of the application to assign a group to.'
             group_id: '- (Required) The ID of the group to assign the app to.'
@@ -193,11 +311,28 @@ resources:
             timeouts.read: '- Read timeout if syncing users/groups (default 1 hour).'
             timeouts.update: '- Update timeout if syncing users/groups (default 1 hour).'
         importStatements: []
-    okta_app_group_assignments':
+    okta_app_group_assignments:
         subCategory: ""
         description: Assigns groups to an application.
-        name: okta_app_group_assignments'
+        name: okta_app_group_assignments
         title: okta_app_group_assignments'
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "app_id": "\u003capp id\u003e",
+                  "group": [
+                    {
+                      "id": "\u003cgroup id\u003e",
+                      "priority": 1
+                    },
+                    {
+                      "id": "\u003canother group id\u003e",
+                      "priority": 2,
+                      "profile": "${jsonencode({\"application profile field\": \"application profile value\"})}"
+                    }
+                  ]
+                }
         argumentDocs:
             app_id: '- (Required) The ID of the application to assign a group to.'
             group: '- (Required) A group to assign the app to.'
@@ -205,11 +340,86 @@ resources:
             priority: '- (Optional) Priority of group assignment'
             profile: '- (Optional) JSON document containing application profile'
         importStatements: []
-    okta_app_oauth':
+    okta_app_oauth:
         subCategory: ""
         description: Creates an OIDC Application.
-        name: okta_app_oauth'
+        name: okta_app_oauth
         title: okta_app_oauth'
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "grant_types": [
+                    "authorization_code"
+                  ],
+                  "label": "example",
+                  "redirect_uris": [
+                    "https://example.com/"
+                  ],
+                  "response_types": [
+                    "code"
+                  ],
+                  "type": "web"
+                }
+            - name: example
+              manifest: |-
+                {
+                  "grant_types": [
+                    "client_credentials"
+                  ],
+                  "jwks": [
+                    {
+                      "e": "AQAB",
+                      "kid": "SIGNING_KEY_RSA",
+                      "kty": "RSA",
+                      "n": "xyz"
+                    },
+                    {
+                      "kid": "SIGNING_KEY_EC",
+                      "kty": "EC",
+                      "x": "K37X78mXJHHldZYMzrwipjKR-YZUS2SMye0KindHp6I",
+                      "y": "8IfvsvXWzbFWOZoVOMwgF5p46mUj3kbOVf9Fk0vVVHo"
+                    }
+                  ],
+                  "label": "example",
+                  "response_types": [
+                    "token"
+                  ],
+                  "token_endpoint_auth_method": "private_key_jwt",
+                  "type": "service"
+                }
+            - name: app
+              manifest: |-
+                {
+                  "grant_types": [
+                    "client_credentials"
+                  ],
+                  "jwks": [
+                    {
+                      "e": "${local.jwks.e}",
+                      "kid": "${local.jwks.kid}",
+                      "kty": "${local.jwks.kty}",
+                      "n": "${local.jwks.n}"
+                    }
+                  ],
+                  "label": "My OAuth App",
+                  "response_types": [
+                    "token"
+                  ],
+                  "token_endpoint_auth_method": "private_key_jwt",
+                  "type": "service"
+                }
+              references:
+                jwks.e: local.jwks.e
+                jwks.kid: local.jwks.kid
+                jwks.kty: local.jwks.kty
+                jwks.n: local.jwks.n
+              dependencies:
+                tls_private_key.rsa: |-
+                    {
+                      "algorithm": "RSA",
+                      "rsa_bits": 4096
+                    }
         argumentDocs:
             DEPRECATED: ': This field is being replaced by client_id. Please use that field instead.",'
             accessibility_error_redirect_url: '- (Optional) Custom error page URL.'
@@ -303,41 +513,183 @@ resources:
             value: '- (Required) Value of the claim. Can be an Okta Expression Language statement that evaluates at the time the token is minted.'
             wildcard_redirect: '- (Optional) Early Access Property. Indicates if the client is allowed to use wildcard matching of redirect_uris. Valid values: "DISABLED", "SUBDOMAIN". Default value is "DISABLED".'
         importStatements: []
-    okta_app_oauth_api_scope':
+    okta_app_oauth_api_scope:
         subCategory: ""
         description: Manages API scopes for OAuth applications.
-        name: okta_app_oauth_api_scope'
+        name: okta_app_oauth_api_scope
         title: okta_app_oauth_api_scope'
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "app_id": "\u003capplication_id\u003e",
+                  "issuer": "\u003cyour org domain\u003e",
+                  "scopes": [
+                    "okta.users.read",
+                    "okta.users.manage"
+                  ]
+                }
         argumentDocs:
             app_id: '- (Required) ID of the application.'
             issuer: '- (Required) The issuer of your Org Authorization Server, your Org URL.'
             scopes: '- (Required) List of scopes for which consent is granted.'
         importStatements: []
-    okta_app_oauth_post_logout_redirect_uri':
+    okta_app_oauth_post_logout_redirect_uri:
         subCategory: ""
         description: Manager app OAuth post logout redirect URI
-        name: okta_app_oauth_post_logout_redirect_uri'
+        name: okta_app_oauth_post_logout_redirect_uri
         title: okta_app_oauth_post_logout_redirect_uri'
+        examples:
+            - name: test
+              manifest: |-
+                {
+                  "app_id": "${okta_app_oauth.test.id}",
+                  "uri": "https://www.example.com"
+                }
+              references:
+                app_id: okta_app_oauth.test.id
+              dependencies:
+                okta_app_oauth.test: |-
+                    {
+                      "grant_types": [
+                        "authorization_code"
+                      ],
+                      "label": "testAcc_replace_with_uuid",
+                      "lifecycle": [
+                        {
+                          "ignore_changes": [
+                            "${redirect_uris}"
+                          ]
+                        }
+                      ],
+                      "post_logout_redirect_uris": [
+                        "https://www.example.com"
+                      ],
+                      "redirect_uris": [
+                        "myapp://callback"
+                      ],
+                      "response_types": [
+                        "code"
+                      ],
+                      "type": "web"
+                    }
         argumentDocs:
             app_id: '- (Required) OAuth application ID. Note: app_id can not be changed once set.'
             id: '- ID of the resource, equals to uri.'
             uri: '- (Required) Post Logout Redirect URI to append to Okta OIDC application.'
         importStatements: []
-    okta_app_oauth_redirect_uri':
+    okta_app_oauth_redirect_uri:
         subCategory: ""
         description: Manager app OAuth redirect URI
-        name: okta_app_oauth_redirect_uri'
+        name: okta_app_oauth_redirect_uri
         title: okta_app_oauth_redirect_uri'
+        examples:
+            - name: test
+              manifest: |-
+                {
+                  "app_id": "${okta_app_oauth.test.id}",
+                  "uri": "http://google.com"
+                }
+              references:
+                app_id: okta_app_oauth.test.id
+              dependencies:
+                okta_app_oauth.test: |-
+                    {
+                      "grant_types": [
+                        "authorization_code"
+                      ],
+                      "label": "testAcc_replace_with_uuid",
+                      "lifecycle": [
+                        {
+                          "ignore_changes": [
+                            "${redirect_uris}"
+                          ]
+                        }
+                      ],
+                      "redirect_uris": [
+                        "myapp://callback"
+                      ],
+                      "response_types": [
+                        "code"
+                      ],
+                      "type": "web"
+                    }
         argumentDocs:
             app_id: '- (Required) OAuth application ID. Note: app_id can not be changed once set.'
             id: '- ID of the resource, equals to uri.'
             uri: '- (Required) Redirect URI to append to Okta OIDC application.'
         importStatements: []
-    okta_app_oauth_role_assignment':
+    okta_app_oauth_role_assignment:
         subCategory: ""
         description: Manages assignment of an admin role to an OAuth application
-        name: okta_app_oauth_role_assignment'
+        name: okta_app_oauth_role_assignment
         title: okta_app_oauth_role_assignment'
+        examples:
+            - name: test
+              manifest: |-
+                {
+                  "client_id": "${okta_app_oauth.test.client_id}",
+                  "type": "HELP_DESK_ADMIN"
+                }
+              references:
+                client_id: okta_app_oauth.test.client_id
+              dependencies:
+                okta_app_oauth.test: |-
+                    {
+                      "grant_types": [
+                        "client_credentials"
+                      ],
+                      "jwks_uri": "https://example.com",
+                      "label": "test",
+                      "response_types": [
+                        "token"
+                      ],
+                      "type": "service"
+                    }
+            - name: test
+              manifest: |-
+                {
+                  "client_id": "${okta_app_oauth.test.client_id}",
+                  "resource_set": "${okta_resource_set.test.id}",
+                  "role": "${okta_admin_role_custom.test.id}",
+                  "type": "CUSTOM"
+                }
+              references:
+                client_id: okta_app_oauth.test.client_id
+                resource_set: okta_resource_set.test.id
+                role: okta_admin_role_custom.test.id
+              dependencies:
+                okta_admin_role_custom.test: |-
+                    {
+                      "description": "testing, testing",
+                      "label": "test",
+                      "permissions": [
+                        "okta.apps.assignment.manage",
+                        "okta.users.manage",
+                        "okta.apps.manage"
+                      ]
+                    }
+                okta_app_oauth.test: |-
+                    {
+                      "grant_types": [
+                        "client_credentials"
+                      ],
+                      "jwks_uri": "https://example.com",
+                      "label": "test",
+                      "response_types": [
+                        "token"
+                      ],
+                      "type": "service"
+                    }
+                okta_resource_set.test: |-
+                    {
+                      "description": "testing, testing",
+                      "label": "test",
+                      "resources": [
+                        "${format(\"%s/api/v1/users\", \"https://example.okta.com\")}",
+                        "${format(\"%s/api/v1/apps\", \"https://example.okta.com\")}"
+                      ]
+                    }
         argumentDocs:
             client_id: '- (Required) Client ID for the role to be assigned to'
             id: '- Role Assignment ID'
@@ -528,20 +880,46 @@ resources:
             x5c: '- X.509 certificate chain.'
             x5t_s256: '- X.509 certificate SHA-256 thumbprint.'
         importStatements: []
-    okta_app_saml_app_settings':
+    okta_app_saml_app_settings:
         subCategory: ""
         description: Manages app settings of the SAML application.
-        name: okta_app_saml_app_settings'
+        name: okta_app_saml_app_settings
         title: okta_app_saml_app_settings'
+        examples:
+            - name: test
+              manifest: |-
+                {
+                  "app_id": "${okta_app_saml.test.id}",
+                  "settings": "${jsonencode(\n  {\n    \"appFilter\" : \"okta\",\n    \"awsEnvironmentType\" : \"aws.amazon\",\n    \"groupFilter\" : \"aws_(?{{accountid}}\\\\\\\\d+)_(?{{role}}[a-zA-Z0-9+=,.@\\\\\\\\-_]+)\",\n    \"joinAllRoles\" : false,\n    \"loginURL\" : \"https://console.aws.amazon.com/ec2/home\",\n    \"roleValuePattern\" : \"arn:aws:iam::$${accountid}:saml-provider/OKTA,arn:aws:iam::$${accountid}:role/$${role}\",\n    \"sessionDuration\" : 3200,\n    \"useGroupMapping\" : false\n  }\n  )}"
+                }
+              references:
+                app_id: okta_app_saml.test.id
+              dependencies:
+                okta_app_saml.test: |-
+                    {
+                      "label": "Amazon AWS",
+                      "preconfigured_app": "amazon_aws",
+                      "status": "ACTIVE"
+                    }
         argumentDocs:
             app_id: '- (Required) ID of the application.'
             settings: '- (Required) Application settings in JSON format.'
         importStatements: []
-    okta_app_secure_password_store':
+    okta_app_secure_password_store:
         subCategory: ""
         description: Creates a Secure Password Store Application.
-        name: okta_app_secure_password_store'
+        name: okta_app_secure_password_store
         title: okta_app_secure_password_store'
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "credentials_scheme": "ADMIN_SETS_CREDENTIALS",
+                  "label": "example",
+                  "password_field": "pass",
+                  "url": "https://test.com",
+                  "username_field": "user"
+                }
         argumentDocs:
             accessibility_error_redirect_url: '- (Optional) Custom error page URL.'
             accessibility_login_redirect_url: '- (Optional) Custom login page for this application.'
@@ -578,11 +956,34 @@ resources:
             user_name_template_type: '- (Optional) Username template type. Default: "BUILT_IN".'
             username_field: '- (Required) Login username field.'
         importStatements: []
-    okta_app_shared_credentials':
+    okta_app_shared_credentials:
         subCategory: ""
         description: Creates a SWA shared credentials app.
-        name: okta_app_shared_credentials'
+        name: okta_app_shared_credentials
         title: okta_app_shared_credentials'
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "accessibility_error_redirect_url": "https://example.com/redirect_url_1",
+                  "accessibility_login_redirect_url": "https://example.com/redirect_url_2",
+                  "accessibility_self_service": true,
+                  "auto_submit_toolbar": true,
+                  "button_field": "btn-login",
+                  "checkbox": "checkbox_red",
+                  "hide_ios": true,
+                  "label": "Example App",
+                  "password_field": "txtbox-password",
+                  "redirect_url": "https://example.com/redirect_url",
+                  "shared_password": "sharedpass",
+                  "shared_username": "sharedusername",
+                  "status": "ACTIVE",
+                  "url": "https://example.com/login.html",
+                  "user_name_template": "user.firstName",
+                  "user_name_template_suffix": "hello",
+                  "user_name_template_type": "CUSTOM",
+                  "username_field": "txtbox-username"
+                }
         argumentDocs:
             accessibility_error_redirect_url: '- (Optional) Custom error page URL.'
             accessibility_login_redirect_url: '- (Optional) Custom login page for this application.'
@@ -671,11 +1072,210 @@ resources:
             id: '- ID of the sign-on policy.'
             name: '- (Required) Name of the policy.'
         importStatements: []
-    okta_app_signon_policy_rule':
+    okta_app_signon_policy_rule:
         subCategory: ""
         description: Manages a sign-on policy rules for the application.
-        name: okta_app_signon_policy_rule'
+        name: okta_app_signon_policy_rule
         title: okta_app_signon_policy_rule'
+        examples:
+            - name: test
+              manifest: |-
+                {
+                  "name": "testAcc_replace_with_uuid",
+                  "policy_id": "${data.okta_app_signon_policy.test.id}"
+                }
+              references:
+                policy_id: data.okta_app_signon_policy.test.id
+              dependencies:
+                okta_app_saml.test: |-
+                    {
+                      "audience": "https://audience.com",
+                      "authn_context_class_ref": "urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport",
+                      "destination": "https://its-about-the-journey.com",
+                      "digest_algorithm": "SHA256",
+                      "honor_force_authn": false,
+                      "label": "My App",
+                      "recipient": "https://here.com",
+                      "response_signed": true,
+                      "signature_algorithm": "RSA_SHA256",
+                      "sso_url": "https://google.com",
+                      "status": "ACTIVE",
+                      "subject_name_id_format": "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress",
+                      "subject_name_id_template": "${user.userName}"
+                    }
+            - name: test
+              manifest: |-
+                {
+                  "constraints": [
+                    "${jsonencode({\n      \"knowledge\" : {\n        \"types\" : [\"password\"]\n      },\n    })}"
+                  ],
+                  "name": "testAcc_replace_with_uuid",
+                  "policy_id": "${data.okta_app_signon_policy.test.id}"
+                }
+              references:
+                policy_id: data.okta_app_signon_policy.test.id
+            - name: test
+              manifest: |-
+                {
+                  "constraints": [
+                    "${jsonencode(\n    {\n      knowledge  = {\n        reauthenticateIn = \"PT2H\"\n        types            = [\n          \"password\",\n        ]\n      }\n      possession = {\n        deviceBound        = \"REQUIRED\"\n        hardwareProtection = \"REQUIRED\"\n      }\n    }\n    )}"
+                  ],
+                  "name": "testAcc_replace_with_uuid",
+                  "policy_id": "${data.okta_app_signon_policy.test.id}"
+                }
+              references:
+                policy_id: data.okta_app_signon_policy.test.id
+            - name: test
+              manifest: |-
+                {
+                  "access": "ALLOW",
+                  "constraints": [
+                    "${jsonencode({\n      \"knowledge\" : {\n        \"reauthenticateIn\" : \"PT2H\",\n        \"types\" : [\"password\"]\n      },\n      \"possession\" : {\n        \"deviceBound\" : \"REQUIRED\"\n      }\n    })}",
+                    "${jsonencode({\n      \"possession\" : {\n        \"deviceBound\" : \"REQUIRED\",\n        \"hardwareProtection\" : \"REQUIRED\",\n        \"userPresence\" : \"OPTIONAL\"\n      }\n    })}"
+                  ],
+                  "custom_expression": "user.status == \"ACTIVE\"",
+                  "device_assurances_included": [
+                    "${okta_policy_device_assurance_android.test.id}"
+                  ],
+                  "device_is_managed": false,
+                  "device_is_registered": true,
+                  "factor_mode": "2FA",
+                  "groups_excluded": [
+                    "${okta_group.this[2].id}",
+                    "${okta_group.this[3].id}",
+                    "${okta_group.this[4].id}"
+                  ],
+                  "groups_included": [
+                    "${okta_group.this[0].id}",
+                    "${okta_group.this[1].id}"
+                  ],
+                  "name": "testAcc_replace_with_uuid",
+                  "network_connection": "ZONE",
+                  "network_includes": [
+                    "${okta_network_zone.test.id}"
+                  ],
+                  "platform_include": [
+                    {
+                      "os_type": "ANDROID",
+                      "type": "MOBILE"
+                    },
+                    {
+                      "os_type": "IOS",
+                      "type": "MOBILE"
+                    },
+                    {
+                      "os_type": "MACOS",
+                      "type": "DESKTOP"
+                    },
+                    {
+                      "os_type": "OTHER",
+                      "type": "DESKTOP"
+                    },
+                    {
+                      "os_type": "OTHER",
+                      "type": "MOBILE"
+                    },
+                    {
+                      "os_type": "WINDOWS",
+                      "type": "DESKTOP"
+                    }
+                  ],
+                  "policy_id": "${data.okta_app_signon_policy.test.id}",
+                  "priority": 98,
+                  "re_authentication_frequency": "PT43800H",
+                  "type": "ASSURANCE",
+                  "user_types_excluded": [
+                    "${okta_user_type.test.id}"
+                  ],
+                  "user_types_included": [
+                    "${data.okta_user_type.default.id}"
+                  ],
+                  "users_excluded": [
+                    "${okta_user.test[2].id}",
+                    "${okta_user.test[3].id}",
+                    "${okta_user.test[4].id}"
+                  ],
+                  "users_included": [
+                    "${okta_user.test[0].id}",
+                    "${okta_user.test[1].id}"
+                  ]
+                }
+              references:
+                device_assurances_included: okta_policy_device_assurance_android.test.id
+                groups_excluded: okta_group.this[2].id
+                groups_included: okta_group.this[0].id
+                network_includes: okta_network_zone.test.id
+                policy_id: data.okta_app_signon_policy.test.id
+                user_types_excluded: okta_user_type.test.id
+                user_types_included: data.okta_user_type.default.id
+                users_excluded: okta_user.test[2].id
+                users_included: okta_user.test[0].id
+              dependencies:
+                okta_app_saml.test: |-
+                    {
+                      "attribute_statements": [
+                        {
+                          "filter_type": "REGEX",
+                          "filter_value": ".*",
+                          "name": "groups",
+                          "type": "GROUP"
+                        }
+                      ],
+                      "audience": "https://audience.com",
+                      "authn_context_class_ref": "urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport",
+                      "destination": "https://its-about-the-journey.com",
+                      "digest_algorithm": "SHA256",
+                      "honor_force_authn": false,
+                      "label": "testAcc_replace_with_uuid",
+                      "recipient": "https://here.com",
+                      "response_signed": true,
+                      "signature_algorithm": "RSA_SHA256",
+                      "single_logout_certificate": "MIIFnDCCA4QCCQDBSLbiON2T1zANBgkqhkiG9w0BAQsFADCBjzELMAkGA1UEBhMCVVMxDjAMBgNV\r\nBAgMBU1haW5lMRAwDgYDVQQHDAdDYXJpYm91MRcwFQYDVQQKDA5Tbm93bWFrZXJzIEluYzEUMBIG\r\nA1UECwwLRW5naW5lZXJpbmcxDTALBgNVBAMMBFNub3cxIDAeBgkqhkiG9w0BCQEWEWVtYWlsQGV4\r\nYW1wbGUuY29tMB4XDTIwMTIwMzIyNDY0M1oXDTMwMTIwMTIyNDY0M1owgY8xCzAJBgNVBAYTAlVT\r\nMQ4wDAYDVQQIDAVNYWluZTEQMA4GA1UEBwwHQ2FyaWJvdTEXMBUGA1UECgwOU25vd21ha2VycyBJ\r\nbmMxFDASBgNVBAsMC0VuZ2luZWVyaW5nMQ0wCwYDVQQDDARTbm93MSAwHgYJKoZIhvcNAQkBFhFl\r\nbWFpbEBleGFtcGxlLmNvbTCCAiIwDQYJKoZIhvcNAQEBBQADggIPADCCAgoCggIBANMmWDjXPdoa\r\nPyzIENqeY9njLan2FqCbQPSestWUUcb6NhDsJVGSQ7XR+ozQA5TaJzbP7cAJUj8vCcbqMZsgOQAu\r\nO/pzYyQEKptLmrGvPn7xkJ1A1xLkp2NY18cpDTeUPueJUoidZ9EJwEuyUZIktzxNNU1pA1lGijiu\r\n2XNxs9d9JR/hm3tCu9Im8qLVB4JtX80YUa6QtlRjWR/H8a373AYCOASdoB3c57fIPD8ATDNy2w/c\r\nfCVGiyKDMFB+GA/WTsZpOP3iohRp8ltAncSuzypcztb2iE+jijtTsiC9kUA2abAJqqpoCJubNShi\r\nVff4822czpziS44MV2guC9wANi8u3Uyl5MKsU95j01jzadKRP5S+2f0K+n8n4UoV9fnqZFyuGAKd\r\nCJi9K6NlSAP+TgPe/JP9FOSuxQOHWJfmdLHdJD+evoKi9E55sr5lRFK0xU1Fj5Ld7zjC0pXPhtJf\r\nsgjEZzD433AsHnRzvRT1KSNCPkLYomznZo5n9rWYgCQ8HcytlQDTesmKE+s05E/VSWNtH84XdDrt\r\nieXwfwhHfaABSu+WjZYxi9CXdFCSvXhsgufUcK4FbYAHl/ga/cJxZc52yFC7Pcq0u9O2BSCjYPdQ\r\nDAHs9dhT1RhwVLM8RmoAzgxyyzau0gxnAlgSBD9FMW6dXqIHIp8yAAg9cRXhYRTNAgMBAAEwDQYJ\r\nKoZIhvcNAQELBQADggIBADofEC1SvG8qa7pmKCjB/E9Sxhk3mvUO9Gq43xzwVb721Ng3VYf4vGU3\r\nwLUwJeLt0wggnj26NJweN5T3q9T8UMxZhHSWvttEU3+S1nArRB0beti716HSlOCDx4wTmBu/D1MG\r\nt/kZYFJw+zuzvAcbYct2pK69AQhD8xAIbQvqADJI7cCK3yRry+aWtppc58P81KYabUlCfFXfhJ9E\r\nP72ffN4jVHpX3lxxYh7FKAdiKbY2FYzjsc7RdgKI1R3iAAZUCGBTvezNzaetGzTUjjl/g1tcVYij\r\nltH9ZOQBPlUMI88lxUxqgRTerpPmAJH00CACx4JFiZrweLM1trZyy06wNDQgLrqHr3EOagBF/O2h\r\nhfTehNdVr6iq3YhKWBo4/+RL0RCzHMh4u86VbDDnDn4Y6HzLuyIAtBFoikoKM6UHTOa0Pqv2bBr5\r\nwbkRkVUxl9yJJw/HmTCdfnsM9dTOJUKzEglnGF2184Gg+qJDZB6fSf0EAO1F6sTqiSswl+uHQZiy\r\nDaZzyU7Gg5seKOZ20zTRaX3Ihj9Zij/ORnrARE7eM/usKMECp+7syUwAUKxDCZkGiUdskmOhhBGL\r\nJtbyK3F2UvoJoLsm3pIcvMak9KwMjSTGJB47ABUP1+w+zGcNk0D5Co3IJ6QekiLfWJyQ+kKsWLKt\r\nzOYQQatrnBagM7MI2/T4\r\n",
+                      "single_logout_issuer": "https://dunshire.okta.com",
+                      "single_logout_url": "https://dunshire.okta.com/logout",
+                      "sso_url": "https://google.com",
+                      "subject_name_id_format": "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress",
+                      "subject_name_id_template": "${user.userName}"
+                    }
+                okta_group.this: |-
+                    {
+                      "count": 5,
+                      "description": "testAcc_${count.index}",
+                      "name": "testAcc_${count.index}"
+                    }
+                okta_network_zone.test: |-
+                    {
+                      "gateways": [
+                        "1.2.3.4/24",
+                        "2.3.4.5-2.3.4.15"
+                      ],
+                      "name": "testAcc_replace_with_uuid",
+                      "proxies": [
+                        "2.2.3.4/24",
+                        "3.3.4.5-3.3.4.15"
+                      ],
+                      "type": "IP"
+                    }
+                okta_policy_device_assurance_android.test: |-
+                    {
+                      "jailbreak": false,
+                      "name": "test",
+                      "os_version": "12"
+                    }
+                okta_user.test: |-
+                    {
+                      "count": 5,
+                      "email": "testAcc_${count.index}@example.com",
+                      "first_name": "TestAcc",
+                      "last_name": "Smith",
+                      "login": "testAcc_${count.index}@example.com"
+                    }
+                okta_user_type.test: |-
+                    {
+                      "description": "Terraform Acceptance Test User Type Updated",
+                      "display_name": "Terraform Acceptance Test User Type Updated",
+                      "name": "testAcc_replace_with_uuid"
+                    }
         argumentDocs:
             access: '- (Optional) Allow or deny access based on the rule conditions. It can be set to "ALLOW" or "DENY". Default is "ALLOW".'
             constraints: '- (Optional) - An array that contains nested Authenticator Constraint objects that are organized by the Authenticator class. Each element should be in JSON format.'
@@ -710,11 +1310,21 @@ resources:
             users_excluded: '- (Optional) List of users IDs to be excluded.'
             users_included: '- (Optional) List of users IDs to be included.'
         importStatements: []
-    okta_app_swa':
+    okta_app_swa:
         subCategory: ""
         description: Creates a SWA Application.
-        name: okta_app_swa'
+        name: okta_app_swa
         title: okta_app_swa'
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "button_field": "btn-login",
+                  "label": "example",
+                  "password_field": "txtbox-password",
+                  "url": "https://example.com/login.html",
+                  "username_field": "txtbox-username"
+                }
         argumentDocs:
             accessibility_error_redirect_url: '- (Optional) Custom error page URL.'
             accessibility_login_redirect_url: '- (Optional) Custom login page for this application.'
@@ -747,11 +1357,21 @@ resources:
             user_name_template_type: '- (Optional) Username template type. Default: "BUILT_IN".'
             username_field: '- (Optional) Login username field.'
         importStatements: []
-    okta_app_three_field':
+    okta_app_three_field:
         subCategory: ""
         description: Creates a Three Field Application.
-        name: okta_app_three_field'
+        name: okta_app_three_field
         title: okta_app_three_field'
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "credentials_scheme": "EDIT_USERNAME_AND_PASSWORD",
+                  "label": "Example App",
+                  "reveal_password": true,
+                  "sign_on_redirect_url": "https://example.com",
+                  "sign_on_url": "https://example.com/login.html"
+                }
         argumentDocs:
             accessibility_error_redirect_url: '- (Optional) Custom error page URL.'
             accessibility_login_redirect_url: '- (Optional) Custom login page for this application.'
@@ -786,11 +1406,19 @@ resources:
             user_name_template_type: '- (Optional) Username template type. Default: "BUILT_IN".'
             username_selector: '- (Required) Login username field CSS selector.'
         importStatements: []
-    okta_app_user':
+    okta_app_user:
         subCategory: ""
         description: Creates an Application User.
-        name: okta_app_user'
+        name: okta_app_user
         title: okta_app_user'
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "app_id": "\u003capp_id\u003e",
+                  "user_id": "\u003cuser id\u003e",
+                  "username": "example"
+                }
         argumentDocs:
             app_id: '- (Required) App to associate user with.'
             id: '- The ID of the app user.'
@@ -802,11 +1430,21 @@ resources:
                 - (Optional) The username to use for the app user. In case the user is assigned to the app with
                 'SHARED_USERNAME_AND_PASSWORD' credentials scheme, this field will be computed and should not be set.
         importStatements: []
-    okta_app_user_base_schema':
+    okta_app_user_base_schema:
         subCategory: ""
         description: Manages an Application User Base Schema property.
-        name: okta_app_user_base_schema'
+        name: okta_app_user_base_schema
         title: okta_app_user_base_schema'
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "app_id": "\u003capp id\u003e",
+                  "index": "customPropertyName",
+                  "master": "OKTA",
+                  "title": "customPropertyName",
+                  "type": "string"
+                }
         argumentDocs:
             app_id: '- (Required) The Application''s ID the user schema property should be assigned to.'
             index: '- (Required) The property name.'
@@ -817,11 +1455,21 @@ resources:
             title: '- (Required) The property display name.'
             type: '- (Required) The type of the schema property. It can be "string", "boolean", "number", "integer", "array", or "object".'
         importStatements: []
-    okta_app_user_base_schema_property':
+    okta_app_user_base_schema_property:
         subCategory: ""
         description: Manages an Application User Base Schema property.
-        name: okta_app_user_base_schema_property'
+        name: okta_app_user_base_schema_property
         title: okta_app_user_base_schema_property'
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "app_id": "\u003capp id\u003e",
+                  "index": "customPropertyName",
+                  "master": "OKTA",
+                  "title": "customPropertyName",
+                  "type": "string"
+                }
         argumentDocs:
             app_id: '- (Required) The Application''s ID the user schema property should be assigned to.'
             index: '- (Required) The property name.'
@@ -833,11 +1481,23 @@ resources:
             type: '- (Required) The type of the schema property. It can be "string", "boolean", "number", "integer", "array", or "object".'
             user_type: '- User type ID. By default, it is "default".'
         importStatements: []
-    okta_app_user_schema':
+    okta_app_user_schema:
         subCategory: ""
         description: Creates an Application User Schema property.
-        name: okta_app_user_schema'
+        name: okta_app_user_schema
         title: okta_app_user_schema'
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "app_id": "\u003capp id\u003e",
+                  "description": "My custom property name",
+                  "index": "customPropertyName",
+                  "master": "OKTA",
+                  "scope": "SELF",
+                  "title": "customPropertyName",
+                  "type": "string"
+                }
         argumentDocs:
             app_id: '- (Required) The Application''s ID the user custom schema property should be assigned to.'
             array_enum: '- (Optional) Array of values that an array property''s items can be set to.'
@@ -860,11 +1520,23 @@ resources:
             type: '- (Required) The type of the schema property. It can be "string", "boolean", "number", "integer", "array", or "object".'
             union: '- (Optional) Used to assign attribute group priority. Can not be set to ''true'' if scope is set to Individual level.'
         importStatements: []
-    okta_app_user_schema_property':
+    okta_app_user_schema_property:
         subCategory: ""
         description: Creates an Application User Schema property.
-        name: okta_app_user_schema_property'
+        name: okta_app_user_schema_property
         title: okta_app_user_schema_property'
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "app_id": "\u003capp id\u003e",
+                  "description": "My custom property name",
+                  "index": "customPropertyName",
+                  "master": "OKTA",
+                  "scope": "SELF",
+                  "title": "customPropertyName",
+                  "type": "string"
+                }
         argumentDocs:
             app_id: '- (Required) The Application''s ID the user custom schema property should be assigned to.'
             array_enum: '- (Optional) Array of values that an array property''s items can be set to.'
@@ -887,11 +1559,23 @@ resources:
             type: '- (Required) The type of the schema property. It can be "string", "boolean", "number", "integer", "array", or "object".'
             union: '- (Optional) If type is set to "array", used to set whether attribute value is determined by group priority false, or combine values across groups true. Can not be set to true if scope is set to "SELF".'
         importStatements: []
-    okta_auth_server':
+    okta_auth_server:
         subCategory: ""
         description: Creates an Authorization Server.
-        name: okta_auth_server'
+        name: okta_auth_server
         title: okta_auth_server'
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "audiences": [
+                    "api://example"
+                  ],
+                  "description": "My Example Auth Server",
+                  "issuer_mode": "CUSTOM_URL",
+                  "name": "example",
+                  "status": "ACTIVE"
+                }
         argumentDocs:
             audiences: '- (Required) The recipients that the tokens are intended for. This becomes the aud claim in an access token.'
             credentials_last_rotated: '- The timestamp when the authorization server started to use the kid for signing tokens.'
@@ -905,11 +1589,23 @@ resources:
             name: '- (Required) The name of the authorization server.'
             status: '- (Optional) The status of the auth server. It defaults to "ACTIVE"'
         importStatements: []
-    okta_auth_server_claim':
+    okta_auth_server_claim:
         subCategory: ""
         description: Creates an Authorization Server Claim.
-        name: okta_auth_server_claim'
+        name: okta_auth_server_claim
         title: okta_auth_server_claim'
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "auth_server_id": "\u003cauth server id\u003e",
+                  "claim_type": "IDENTITY",
+                  "name": "staff",
+                  "scopes": [
+                    "${okta_auth_server_scope.example.name}"
+                  ],
+                  "value": "String.substringAfter(user.email, \"@\") == \"example.com\""
+                }
         argumentDocs:
             always_include_in_token: '- (Optional) Specifies whether to include claims in token, by default it is set to true.'
             auth_server_id: '- (Required) ID of the authorization server.'
@@ -922,11 +1618,19 @@ resources:
             value: '- (Required) The value of the claim.'
             value_type: '- (Optional) The type of value of the claim. It can be set to "EXPRESSION" or "GROUPS". It defaults to "EXPRESSION".'
         importStatements: []
-    okta_auth_server_claim_default':
+    okta_auth_server_claim_default:
         subCategory: ""
         description: Configures Default Authorization Server Claim
-        name: okta_auth_server_claim_default'
+        name: okta_auth_server_claim_default
         title: okta_auth_server_claim_default'
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "auth_server_id": "\u003cauth server id\u003e",
+                  "name": "sub",
+                  "value": "(appuser != null) ? appuser.userName : app.clientId"
+                }
         argumentDocs:
             always_include_in_token: '- Specifies whether to include claims in token.'
             auth_server_id: '- (Required) ID of the authorization server.'
@@ -941,11 +1645,20 @@ resources:
             value: '- (Optional/Required) The value of the claim. Only required for "sub" claim.'
             value_type: '- The type of value of the claim.'
         importStatements: []
-    okta_auth_server_default':
+    okta_auth_server_default:
         subCategory: ""
         description: Configures Default Authorization Server.
-        name: okta_auth_server_default'
+        name: okta_auth_server_default
         title: okta_auth_server_default'
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "audiences": [
+                    "api://default"
+                  ],
+                  "description": "Default Authorization Server for your Applications"
+                }
         argumentDocs:
             audiences: '- (Optional) The recipients that the tokens are intended for. This becomes the aud claim in an access token.'
             credentials_last_rotated: '- The timestamp when the authorization server started to use the kid for signing tokens.'
@@ -959,11 +1672,24 @@ resources:
             name: '- (Optional) The name of the authorization server. Not necessary but left for backwards capacity with legacy implementation.'
             status: '- (Optional) The status of the auth server.'
         importStatements: []
-    okta_auth_server_policy':
+    okta_auth_server_policy:
         subCategory: ""
         description: Creates an Authorization Server Policy.
-        name: okta_auth_server_policy'
+        name: okta_auth_server_policy
         title: okta_auth_server_policy'
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "auth_server_id": "\u003cauth server id\u003e",
+                  "client_whitelist": [
+                    "ALL_CLIENTS"
+                  ],
+                  "description": "example",
+                  "name": "example",
+                  "priority": 1,
+                  "status": "ACTIVE"
+                }
         argumentDocs:
             auth_server_id: '- (Required) The ID of the Auth Server.'
             client_whitelist: '- (Required) The clients to whitelist the policy for. ["ALL_CLIENTS"] is a special value that can be used to whitelist all clients, otherwise it is a list of client ids.'
@@ -973,11 +1699,27 @@ resources:
             priority: '- (Required) The priority of the Auth Server Policy.'
             status: '- (Optional) The status of the Auth Server Policy.'
         importStatements: []
-    okta_auth_server_policy_rule':
+    okta_auth_server_policy_rule:
         subCategory: ""
         description: Creates an Authorization Server Policy Rule.
-        name: okta_auth_server_policy_rule'
+        name: okta_auth_server_policy_rule
         title: okta_auth_server_policy_rule'
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "auth_server_id": "\u003cauth server id\u003e",
+                  "grant_type_whitelist": [
+                    "implicit"
+                  ],
+                  "group_whitelist": [
+                    "\u003cgroup ids\u003e"
+                  ],
+                  "name": "example",
+                  "policy_id": "\u003cauth server policy id\u003e",
+                  "priority": 1,
+                  "status": "ACTIVE"
+                }
         argumentDocs:
             access_token_lifetime_minutes: '- (Optional) Lifetime of access token. Can be set to a value between 5 and 1440 minutes. Default is 60.'
             auth_server_id: '- (Required) Auth Server ID.'
@@ -1003,11 +1745,20 @@ resources:
             user_blacklist: '- (Optional) Specifies a set of Users to be excluded.'
             user_whitelist: '- (Optional) Specifies a set of Users to be included.'
         importStatements: []
-    okta_auth_server_scope':
+    okta_auth_server_scope:
         subCategory: ""
         description: Creates an Authorization Server Scope.
-        name: okta_auth_server_scope'
+        name: okta_auth_server_scope
         title: okta_auth_server_scope'
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "auth_server_id": "\u003cauth server id\u003e",
+                  "consent": "IMPLICIT",
+                  "metadata_publish": "NO_CLIENTS",
+                  "name": "example"
+                }
         argumentDocs:
             auth_server_id: '- (Required) Auth Server ID.'
             consent: '- (Optional) Indicates whether a consent dialog is needed for the scope. It can be set to "REQUIRED" or "IMPLICIT".'
@@ -1020,11 +1771,19 @@ resources:
             optional: '- (Optional) Whether the scope optional'
             system: '- Whether Okta created the Scope'
         importStatements: []
-    okta_authenticator':
+    okta_authenticator:
         subCategory: ""
         description: Manages Okta Authenticator
-        name: okta_authenticator'
+        name: okta_authenticator
         title: okta_authenticator'
+        examples:
+            - name: test
+              manifest: |-
+                {
+                  "key": "security_question",
+                  "name": "Security Question",
+                  "settings": "${jsonencode(\n  {\n    \"allowedFor\" : \"recovery\"\n  }\n  )}"
+                }
         argumentDocs:
             id: '- ID of the authenticator.'
             key: '(Required) A human-readable string that identifies the authenticator. Some authenticators are available by feature flag on the organization. Possible values inclue: duo, external_idp, google_otp, okta_email, okta_password, okta_verify, onprem_mfa, phone_number, rsa_token, security_question, webauthn'
@@ -1050,11 +1809,50 @@ resources:
             status: '- (Optional) Status of the authenticator. Default is ACTIVE.'
             type: '- The type of Authenticator. Values include: "password", "security_question", "phone", "email", "app", "federated", and "security_key".'
         importStatements: []
-    okta_behavior':
+    okta_behavior:
         subCategory: ""
         description: Creates different types of behavior.
-        name: okta_behavior'
+        name: okta_behavior
         title: okta_behavior'
+        examples:
+            - name: my_location
+              manifest: |-
+                {
+                  "location_granularity_type": "LAT_LONG",
+                  "name": "My Location",
+                  "number_of_authentications": 50,
+                  "radius_from_location": 20,
+                  "type": "ANOMALOUS_LOCATION"
+                }
+            - name: my_city
+              manifest: |-
+                {
+                  "location_granularity_type": "CITY",
+                  "name": "My City",
+                  "number_of_authentications": 50,
+                  "type": "ANOMALOUS_LOCATION"
+                }
+            - name: my_device
+              manifest: |-
+                {
+                  "name": "My Device",
+                  "number_of_authentications": 50,
+                  "type": "ANOMALOUS_DEVICE"
+                }
+            - name: my_ip
+              manifest: |-
+                {
+                  "name": "My IP",
+                  "number_of_authentications": 50,
+                  "type": "ANOMALOUS_IP"
+                }
+            - name: my_velocity
+              manifest: |-
+                {
+                  "name": "My Velocity",
+                  "type": "VELOCITY",
+                  "velocity": 25
+                }
         argumentDocs:
             id: '- ID of the behavior.'
             location_granularity_type: |-
@@ -1076,11 +1874,17 @@ resources:
                 - (Optional) Velocity (in kilometers per hour). Should be at least 1. Required for "VELOCITY" behavior
                 type.
         importStatements: []
-    okta_brand':
+    okta_brand:
         subCategory: ""
         description: Gets, updates, an Okta Brand.
-        name: okta_brand'
+        name: okta_brand
         title: okta_brand'
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "name": "example"
+                }
         argumentDocs:
             DEPRECATED: ': Please stop using this field as it has become noop.'
             agree_to_custom_privacy_policy: '- (Optional) Is a required input flag with when changing custom_privacy_url, shouldn''t be considered as a readable property'
@@ -1097,11 +1901,20 @@ resources:
             name: '- (Required) Name of the brand'
             remove_powered_by_okta: '- (Optional) Removes "Powered by Okta" from the Okta-hosted sign-in page, and "© 2021 Okta, Inc." from the Okta End-User Dashboard'
         importStatements: []
-    okta_captcha':
+    okta_captcha:
         subCategory: ""
         description: Creates different types of captcha.
-        name: okta_captcha'
+        name: okta_captcha
         title: okta_captcha'
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "name": "My CAPTCHA",
+                  "secret_key": "some_secret_key",
+                  "site_key": "some_key",
+                  "type": "HCAPTCHA"
+                }
         argumentDocs:
             id: '- ID of the captcha.'
             name: '- (Required) Name of the captcha.'
@@ -1109,20 +1922,55 @@ resources:
             site_key: '- (Required) Site key issued from the CAPTCHA vendor to render a CAPTCHA on a page.'
             type: '- (Required) Type of the captcha. Valid values: "HCAPTCHA", "RECAPTCHA_V2".'
         importStatements: []
-    okta_captcha_org_wide_settings':
+    okta_captcha_org_wide_settings:
         subCategory: ""
         description: Manages Org-Wide CAPTCHA settings
-        name: okta_captcha_org_wide_settings'
+        name: okta_captcha_org_wide_settings
         title: okta_captcha_org_wide_settings'
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "captcha_id": "${okta_captcha.test.id}",
+                  "enabled_for": [
+                    "SSR"
+                  ]
+                }
+              references:
+                captcha_id: okta_captcha.test.id
+              dependencies:
+                okta_captcha.example: |-
+                    {
+                      "name": "My CAPTCHA",
+                      "secret_key": "some_secret_key",
+                      "site_key": "some_key",
+                      "type": "HCAPTCHA"
+                    }
+            - name: example
+              manifest: '{}'
+              dependencies:
+                okta_captcha.example: |-
+                    {
+                      "name": "My CAPTCHA",
+                      "secret_key": "some_secret_key",
+                      "site_key": "some_key",
+                      "type": "HCAPTCHA"
+                    }
         argumentDocs:
             captcha_id: (Optional) The ID of the CAPTCHA.
             enabled_for: '(Optional) Array of pages that have CAPTCHA enabled. Valid values: "SSR", "SSPR" and "SIGN_IN".'
         importStatements: []
-    okta_domain':
+    okta_domain:
         subCategory: ""
         description: Manages custom domain for your organization.
-        name: okta_domain'
+        name: okta_domain
         title: okta_domain'
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "name": "www.example.com"
+                }
         argumentDocs:
             OKTA_MANAGED: requires a feature flag to be enabled.
             brand_id: '- (Optional) The Brand ID of the domain'
@@ -1136,11 +1984,28 @@ resources:
             validation_status: '- Status of the domain.'
             values: '- DNS verification value'
         importStatements: []
-    okta_domain_certificate':
+    okta_domain_certificate:
         subCategory: ""
         description: Manages certificate for the domain.
-        name: okta_domain_certificate'
+        name: okta_domain_certificate
         title: okta_domain_certificate'
+        examples:
+            - name: test
+              manifest: |-
+                {
+                  "certificate": "-----BEGIN CERTIFICATE-----\nMIIFNzCCBB+gAwIBAgISBAXomJWRama3ypu8TIxdA9wzMA0GCSqGSIb3DQEBCwUA\n...\nNSgRtSXq11j8O4JONi8EXe7cEtvzUiLR5PL3itsK2svtrZ9jIwQ95wOPaA==\n-----END CERTIFICATE-----\n",
+                  "certificate_chain": "-----BEGIN CERTIFICATE-----\nMIIFFjCCAv6gAwIBAgIRAJErCErPDBinU/bWLiWnX1owDQYJKoZIhvcNAQELBQAw\n...\nDfvp7OOGAN6dEOM4+qR9sdjoSYKEBpsr6GtPAQw4dy753ec5\n-----END CERTIFICATE-----\n",
+                  "domain_id": "${okta_domain.test.id}",
+                  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQC5cyk6x63iBJSW\n...\nnUFLNE8pXSnsqb0eOL74f3uQ\n-----END PRIVATE KEY-----\n",
+                  "type": "PEM"
+                }
+              references:
+                domain_id: okta_domain.test.id
+              dependencies:
+                okta_domain.example: |-
+                    {
+                      "name": "www.example.com"
+                    }
         argumentDocs:
             certificate: '- (Required) Certificate content.'
             certificate_chain: '- (Required) Certificate certificate chain.'
@@ -1148,19 +2013,55 @@ resources:
             private_key: '- (Required) Certificate private key.'
             type: '- (Required) Certificate type. Valid value is "PEM".'
         importStatements: []
-    okta_domain_verification':
+    okta_domain_verification:
         subCategory: ""
         description: Verifies the Domain.
-        name: okta_domain_verification'
+        name: okta_domain_verification
         title: okta_domain_verification'
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "domain_id": "${okta_domain.test.id}"
+                }
+              references:
+                domain_id: okta_domain.test.id
+              dependencies:
+                okta_domain.example: |-
+                    {
+                      "name": "www.example.com"
+                    }
         argumentDocs:
             domain_id: '- (Required) Domain ID.'
         importStatements: []
-    okta_email_customization':
+    okta_email_customization:
         subCategory: ""
         description: Create an email customization of an email template belonging to a brand in an Okta organization.
-        name: okta_email_customization'
+        name: okta_email_customization
         title: okta_email_customization'
+        examples:
+            - name: forgot_password_en
+              manifest: |-
+                {
+                  "body": "Hi $$user.firstName,\u003cbr/\u003e\u003cbr/\u003eClick this link to reset your password: $$resetPasswordLink",
+                  "brand_id": "${tolist(data.okta_brands.test.brands)[0].id}",
+                  "is_default": true,
+                  "language": "en",
+                  "subject": "Account password reset",
+                  "template_name": "ForgotPassword"
+                }
+            - name: forgot_password_es
+              manifest: |-
+                {
+                  "body": "Hola $$user.firstName,\u003cbr/\u003e\u003cbr/\u003eHaga clic en este enlace para restablecer tu contraseña: $$resetPasswordLink",
+                  "brand_id": "${tolist(data.okta_brands.test.brands)[0].id}",
+                  "depends_on": [
+                    "${okta_email_customization.forgot_password_en}"
+                  ],
+                  "language": "es",
+                  "subject": "Restablecimiento de contraseña de cuenta",
+                  "template_name": "ForgotPassword"
+                }
         argumentDocs:
             '"AccountLockout"': |-
                 ,
@@ -1233,11 +2134,20 @@ resources:
             subject: '- The subject of the customization'
             template_name: '- (Required) Template Name'
         importStatements: []
-    okta_email_domain':
+    okta_email_domain:
         subCategory: ""
         description: Creates email domain.
-        name: okta_email_domain'
+        name: okta_email_domain
         title: okta_email_domain'
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "brand_id": "abc123",
+                  "display_name": "test",
+                  "domain": "example.com",
+                  "user_name": "paul_atreides"
+                }
         argumentDocs:
             brand_id: '- (Required) Brand id of the email domain.'
             display_name: '- (Required) Display name of the email domain.'
@@ -1251,19 +2161,43 @@ resources:
             validation_status: '- Status of the email domain (shows whether the domain is verified).'
             value: '- DNS record value'
         importStatements: []
-    okta_email_domain_verification':
+    okta_email_domain_verification:
         subCategory: ""
         description: Verifies the email domain.
-        name: okta_email_domain_verification'
+        name: okta_email_domain_verification
         title: okta_email_domain_verification'
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "email_domain_id": "${okta_email_domain.valid.id}"
+                }
+              references:
+                email_domain_id: okta_email_domain.valid.id
+              dependencies:
+                okta_email_domain.example: |-
+                    {
+                      "brand_id": "abc123",
+                      "display_name": "test",
+                      "domain": "example.com",
+                      "user_name": "paul_atreides"
+                    }
         argumentDocs:
             email_domain_id: '- (Required) Email domain ID.'
         importStatements: []
-    okta_email_sender':
+    okta_email_sender:
         subCategory: ""
         description: Creates custom email sender.
-        name: okta_email_sender'
+        name: okta_email_sender
         title: okta_email_sender'
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "from_address": "no-reply@caladan.planet",
+                  "from_name": "Paul Atreides",
+                  "subdomain": "mail"
+                }
         argumentDocs:
             dns_records: '- TXT and CNAME records to be registered for the domain.'
             fqdn: '- DNS record name.'
@@ -1275,11 +2209,26 @@ resources:
             subdomain: '- (Required) Mail domain to send from.'
             value: '- DNS verification value'
         importStatements: []
-    okta_email_sender_verification':
+    okta_email_sender_verification:
         subCategory: ""
         description: Verifies the email sender.
-        name: okta_email_sender_verification'
+        name: okta_email_sender_verification
         title: okta_email_sender_verification'
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "sender_id": "${okta_email_sender.valid.id}"
+                }
+              references:
+                sender_id: okta_email_sender.valid.id
+              dependencies:
+                okta_email_sender.example: |-
+                    {
+                      "from_address": "no-reply@caladan.planet",
+                      "from_name": "Paul Atreides",
+                      "subdomain": "mail"
+                    }
         argumentDocs:
             sender_id: '- (Required) Email sender ID.'
         importStatements: []
@@ -1321,30 +2270,74 @@ resources:
             value: '- (Required) Authentication secret.'
             version: '- (Required) The version of the channel. The currently-supported version is "1.0.0".'
         importStatements: []
-    okta_event_hook_verification':
+    okta_event_hook_verification:
         subCategory: ""
         description: Verifies the Event Hook.
-        name: okta_event_hook_verification'
+        name: okta_event_hook_verification
         title: okta_event_hook_verification'
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "event_hook_id": "${okta_event_hook.example.id}"
+                }
+              references:
+                event_hook_id: okta_event_hook.example.id
+              dependencies:
+                okta_event_hook.example: |-
+                    {
+                      "auth": {
+                        "key": "Authorization",
+                        "type": "HEADER",
+                        "value": "123"
+                      },
+                      "channel": {
+                        "type": "HTTP",
+                        "uri": "https://example.com/test",
+                        "version": "1.0.0"
+                      },
+                      "events": [
+                        "user.lifecycle.create",
+                        "user.lifecycle.delete.initiated"
+                      ],
+                      "name": "example"
+                    }
         argumentDocs:
             event_hook_id: '- (Required) Event Hook ID.'
         importStatements: []
-    okta_factor':
+    okta_factor:
         subCategory: ""
         description: Allows you to manage the activation of Okta MFA methods.
-        name: okta_factor'
+        name: okta_factor
         title: okta_factor'
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "provider_id": "google_otp"
+                }
         argumentDocs:
             active: '- (Optional) Whether to activate the provider, by default, it is set to true.'
             provider_id: |-
                 - (Required) The MFA provider name.
                 Allowed values are "duo", "fido_u2f", "fido_webauthn", "google_otp", "okta_call", "okta_otp", "okta_password", "okta_push", "okta_question", "okta_sms", "okta_email", "rsa_token", "symantec_vip", "yubikey_token", or "hotp".
         importStatements: []
-    okta_factor_totp':
+    okta_factor_totp:
         subCategory: ""
         description: Allows you to manage the time-based one-time password (TOTP) factors.
-        name: okta_factor_totp'
+        name: okta_factor_totp
         title: okta_factor_totp'
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "clock_drift_interval": 10,
+                  "hmac_algorithm": "HMacSHA256",
+                  "name": "example",
+                  "otp_length": 10,
+                  "shared_secret_encoding": "hexadecimal",
+                  "time_step": 30
+                }
         argumentDocs:
             clock_drift_interval: |-
                 - (Optional) - Clock drift interval. This setting allows you to build in tolerance for any
@@ -1360,11 +2353,25 @@ resources:
                 Default is "base32".
             time_step: '- (Optional) - Time step in seconds. Valid values: 15, 30, 60. Default is 15.'
         importStatements: []
-    okta_group':
+    okta_group:
         subCategory: ""
         description: Creates an Okta Group.
-        name: okta_group'
+        name: okta_group
         title: okta_group'
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "description": "My Example Group",
+                  "name": "Example"
+                }
+            - name: example
+              manifest: |-
+                {
+                  "custom_profile_attributes": "${jsonencode({\n    \"example1\" = \"testing1234\",\n    \"example2\" = true,\n    \"example3\" = 54321\n  })}",
+                  "description": "My Example Group",
+                  "name": "Example"
+                }
         argumentDocs:
             custom_profile_attributes: '- (Optional) raw JSON containing all custom profile attributes.'
             description: '- (Optional) The description of the Okta Group.'
@@ -1388,6 +2395,7 @@ resources:
                 }
               references:
                 group_id: okta_group.test.id
+                users: okta_user.test1.id
               dependencies:
                 okta_group.test: |-
                     {
@@ -1399,11 +2407,18 @@ resources:
             track_all_users: '- (Optional) The resource will concern itself with all users added/deleted to the group; even those managed outside of the resource.'
             users: '- (Required) The list of Okta user IDs which the group should have membership managed for.'
         importStatements: []
-    okta_group_role':
+    okta_group_role:
         subCategory: ""
         description: Assigns Admin roles to Okta Groups.
-        name: okta_group_role'
+        name: okta_group_role
         title: okta_group_role'
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "group_id": "\u003cgroup id\u003e",
+                  "role_type": "READ_ONLY_ADMIN"
+                }
         argumentDocs:
             '"APP_ADMIN"': .
             '"USER_ADMIN"': is the Group Administrator.
@@ -1433,11 +2448,23 @@ resources:
                 the targets of the admin role.
             target_group_list: '- (Optional) A list of group IDs you would like as the targets of the admin role.'
         importStatements: []
-    okta_group_rule':
+    okta_group_rule:
         subCategory: ""
         description: Creates an Okta Group Rule.
-        name: okta_group_rule'
+        name: okta_group_rule
         title: okta_group_rule'
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "expression_type": "urn:okta:expression:1.0",
+                  "expression_value": "String.startsWith(user.firstName,\"andy\")",
+                  "group_assignments": [
+                    "\u003cgroup id\u003e"
+                  ],
+                  "name": "example",
+                  "status": "ACTIVE"
+                }
         argumentDocs:
             expression_type: |-
                 - (Optional) The expression type to use to invoke the rule. The default
@@ -1452,11 +2479,22 @@ resources:
             status: '- (Optional) The status of the group rule.'
             users_excluded: '- (Optional) The list of user IDs that would be excluded when rules are processed.'
         importStatements: []
-    okta_group_schema_property':
+    okta_group_schema_property:
         subCategory: ""
         description: Creates a Group Schema property.
-        name: okta_group_schema_property'
+        name: okta_group_schema_property
         title: okta_group_schema_property'
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "description": "My custom property name",
+                  "index": "customPropertyName",
+                  "master": "OKTA",
+                  "scope": "SELF",
+                  "title": "customPropertyName",
+                  "type": "string"
+                }
         argumentDocs:
             array_enum: '- (Optional) Array of values that an array property''s items can be set to.'
             array_one_of: '- (Optional) Display name and value an enum array can be set to.'
@@ -1480,11 +2518,32 @@ resources:
             unique: '- (Optional) Whether the property should be unique. It can be set to "UNIQUE_VALIDATED" or "NOT_UNIQUE".'
             value: '- (Required) - ID of profile source.'
         importStatements: []
-    okta_idp_oidc':
+    okta_idp_oidc:
         subCategory: ""
         description: Creates an OIDC Identity Provider.
-        name: okta_idp_oidc'
+        name: okta_idp_oidc
         title: okta_idp_oidc'
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "authorization_binding": "HTTP-REDIRECT",
+                  "authorization_url": "https://idp.example.com/authorize",
+                  "client_id": "efg456",
+                  "client_secret": "efg456",
+                  "issuer_url": "https://id.example.com",
+                  "jwks_binding": "HTTP-REDIRECT",
+                  "jwks_url": "https://idp.example.com/keys",
+                  "name": "example",
+                  "scopes": [
+                    "openid"
+                  ],
+                  "token_binding": "HTTP-POST",
+                  "token_url": "https://idp.example.com/token",
+                  "user_info_binding": "HTTP-REDIRECT",
+                  "user_info_url": "https://idp.example.com/userinfo",
+                  "username_template": "idpuser.email"
+                }
         argumentDocs:
             account_link_action: '- (Optional) Specifies the account linking action for an IdP user.'
             account_link_group_include: '- (Optional) Group memberships to determine link candidates.'
@@ -1522,11 +2581,26 @@ resources:
             user_type_id: '- User type ID. Can be used as target_id in the okta_profile_mapping resource.'
             username_template: '- (Optional) Okta EL Expression to generate or transform a unique username for the IdP user.'
         importStatements: []
-    okta_idp_saml':
+    okta_idp_saml:
         subCategory: ""
         description: Creates a SAML Identity Provider.
-        name: okta_idp_saml'
+        name: okta_idp_saml
         title: okta_idp_saml'
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "acs_type": "INSTANCE",
+                  "issuer": "https://idp.example.com",
+                  "kid": "${okta_idp_saml_key.test.id}",
+                  "name": "testAcc_replace_with_uuid",
+                  "request_signature_scope": "REQUEST",
+                  "response_signature_scope": "ANY",
+                  "sso_binding": "HTTP-POST",
+                  "sso_destination": "https://idp.example.com",
+                  "sso_url": "https://idp.example.com",
+                  "username_template": "idpuser.email"
+                }
         argumentDocs:
             account_link_action: '- (Optional) Specifies the account linking action for an IdP user.'
             account_link_group_include: '- (Optional) Group memberships to determine link candidates.'
@@ -1563,11 +2637,26 @@ resources:
             user_type_id: '- User type ID. Can be used as target_id in the okta_profile_mapping resource.'
             username_template: '- (Optional) Okta EL Expression to generate or transform a unique username for the IdP user.'
         importStatements: []
-    okta_idp_saml_key':
+    okta_idp_saml_key:
         subCategory: ""
         description: Creates a SAML Identity Provider Signing Key.
-        name: okta_idp_saml_key'
+        name: okta_idp_saml_key
         title: okta_idp_saml_key'
+        examples:
+            - name: example_1
+              manifest: |-
+                {
+                  "x5c": [
+                    "${okta_app_saml.example.certificate}"
+                  ]
+                }
+            - name: example_2
+              manifest: |-
+                {
+                  "x5c": [
+                    "MIIDnjCCAoagAwIBAgIGAVG3MN+PMA0GCSqGSIb3DQEBBQUAMIGPMQswCQYDVQQGEwJVUzETMBEGA1UECAwKQ2FsaWZvcm5p\nYTEWMBQGA1UEBwwNU2FuIEZyYW5jaXNjbzENMAsGA1UECgwET2t0YTEUMBIGA1UECwwLU1NPUHJvdmlkZXIxEDAOBgNVBAMM\nB2V4YW1wbGUxHDAaBgkqhkiG9w0BCQEWDWluZm9Ab2t0YS5jb20wHhcNMTUxMjE4MjIyMjMyWhcNMjUxMjE4MjIyMzMyWjCB\njzELMAkGA1UEBhMCVVMxEzARBgNVBAgMCkNhbGlmb3JuaWExFjAUBgNVBAcMDVNhbiBGcmFuY2lzY28xDTALBgNVBAoMBE9r\ndGExFDASBgNVBAsMC1NTT1Byb3ZpZGVyMRAwDgYDVQQDDAdleGFtcGxlMRwwGgYJKoZIhvcNAQkBFg1pbmZvQG9rdGEuY29t\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtcnyvuVCrsFEKCwHDenS3Ocjed8eWDv3zLtD2K/iZfE8BMj2wpTf\nn6Ry8zCYey3mWlKdxIybnV9amrujGRnE0ab6Q16v9D6RlFQLOG6dwqoRKuZy33Uyg8PGdEudZjGbWuKCqqXEp+UKALJHV+k4\nwWeVH8g5d1n3KyR2TVajVJpCrPhLFmq1Il4G/IUnPe4MvjXqB6CpKkog1+ThWsItPRJPAM+RweFHXq7KfChXsYE7Mmfuly8s\nDQlvBmQyxZnFHVuiPfCvGHJjpvHy11YlHdOjfgqHRvZbmo30+y0X/oY/yV4YEJ00LL6eJWU4wi7ViY3HP6/VCdRjHoRdr5L/\nDwIDAQABMA0GCSqGSIb3DQEBBQUAA4IBAQCzzhOFkvyYLNFj2WDcq1YqD4sBy1iCia9QpRH3rjQvMKDwQDYWbi6EdOX0TQ/I\nYR7UWGj+2pXd6v0t33lYtoKocp/4lUvT3tfBnWZ5KnObi+J2uY2teUqoYkASN7F+GRPVOuMVoVgm05ss8tuMb2dLc9vsx93s\nDt+XlMTv/2qi5VPwaDtqduKkzwW9lUfn4xIMkTiVvCpe0X2HneD2Bpuao3/U8Rk0uiPfq6TooWaoW3kjsmErhEAs9bA7xuqo\n1KKY9CdHcFhkSsMhoeaZylZHtzbnoipUlQKSLMdJQiiYZQ0bYL83/Ta9fulr1EERICMFt3GUmtYaZZKHpWSfdJp9"
+                  ]
+                }
         argumentDocs:
             created: '- Date created.'
             expires_at: '- Date the cert expires.'
@@ -1578,11 +2667,26 @@ resources:
             x5c: '- (Required) base64-encoded X.509 certificate chain with DER encoding.'
             x5t_s256: '- base64url-encoded SHA-256 thumbprint of the DER encoding of an X.509 certificate.'
         importStatements: []
-    okta_idp_social':
+    okta_idp_social:
         subCategory: ""
         description: Creates an Social Identity Provider.
-        name: okta_idp_social'
+        name: okta_idp_social
         title: okta_idp_social'
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "client_id": "abcd123",
+                  "client_secret": "abcd123",
+                  "name": "testAcc_facebook_replace_with_uuid",
+                  "protocol_type": "OAUTH2",
+                  "scopes": [
+                    "public_profile",
+                    "email"
+                  ],
+                  "type": "FACEBOOK",
+                  "username_template": "idpuser.email"
+                }
         argumentDocs:
             account_link_action: '- (Optional) Specifies the account linking action for an IdP user.'
             account_link_group_include: '- (Optional) Group memberships to determine link candidates.'
@@ -1654,11 +2758,22 @@ resources:
             value: '- (Required) Authentication secret.'
             version: '- (Required) The version of the hook. The currently-supported version is "1.0.0".'
         importStatements: []
-    okta_link_definition':
+    okta_link_definition:
         subCategory: ""
         description: Manages the creation and removal of the link definitions.
-        name: okta_link_definition'
+        name: okta_link_definition
         title: okta_link_definition'
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "associated_description": "Elite military force member",
+                  "associated_name": "sardaukar",
+                  "associated_title": "Sardaukar",
+                  "primary_description": "Hereditary ruler of the Imperium and the Known Universe",
+                  "primary_name": "emperor",
+                  "primary_title": "Emperor"
+                }
         argumentDocs:
             associated_description: '- (Required) Description of the associated relationship.'
             associated_name: '- (Required) API name of the associated link.'
@@ -1668,22 +2783,88 @@ resources:
             primary_name: '- (Required) API name of the primary link.'
             primary_title: '- (Required) Display name of the primary link.'
         importStatements: []
-    okta_link_value':
+    okta_link_value:
         subCategory: ""
         description: Manages users relationships
-        name: okta_link_value'
+        name: okta_link_value
         title: okta_link_value'
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "associated_user_ids": [
+                    "${okta_user.sardaukars[0].id}",
+                    "${okta_user.sardaukars[1].id}",
+                    "${okta_user.sardaukars[2].id}",
+                    "${okta_user.sardaukars[3].id}",
+                    "${okta_user.sardaukars[4].id}"
+                  ],
+                  "primary_name": "${okta_link_definition.padishah.primary_name}",
+                  "primary_user_id": "${okta_user.emperor.id}"
+                }
+              references:
+                associated_user_ids: okta_user.sardaukars[0].id
+                primary_name: okta_link_definition.padishah.primary_name
+                primary_user_id: okta_user.emperor.id
+              dependencies:
+                okta_link_definition.padishah: |-
+                    {
+                      "associated_description": "Elite military force member",
+                      "associated_name": "sardaukar",
+                      "associated_title": "Sardaukar",
+                      "primary_description": "Hereditary ruler of the Imperium and the Known Universe",
+                      "primary_name": "emperor",
+                      "primary_title": "Emperor"
+                    }
+                okta_user.emperor: |-
+                    {
+                      "email": "shaddam.corrino.iv@salusa-secundus.planet",
+                      "first_name": "Shaddam",
+                      "last_name": "Corrino IV",
+                      "login": "shaddam.corrino.iv@salusa-secundus.planet"
+                    }
+                okta_user.sardaukars: |-
+                    {
+                      "count": 5,
+                      "email": "amritsardaukar_${count.index}@salusa-secundus.planet",
+                      "first_name": "Amrit",
+                      "last_name": "Sardaukar_${count.index}",
+                      "login": "amritsardaukar_${count.index}@salusa-secundus.planet"
+                    }
         argumentDocs:
             associated_user_ids: '- (Optional) Set of User IDs or login values of the users to be assigned the ''associated'' relationship.'
             id: '- ID of this resource in primary_name/primary_user_id format.'
             primary_name: '- (Required) Name of the primary relationship being assigned.'
             primary_user_id: '- (Required) User ID to be assigned to primary for the associated user in the specified relationship.'
         importStatements: []
-    okta_network_zone':
+    okta_network_zone:
         subCategory: ""
         description: Creates an Okta Network Zone.
-        name: okta_network_zone'
+        name: okta_network_zone
         title: okta_network_zone'
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "gateways": [
+                    "1.2.3.4/24",
+                    "2.3.4.5-2.3.4.15"
+                  ],
+                  "name": "example",
+                  "proxies": [
+                    "2.2.3.4/24",
+                    "3.3.4.5-3.3.4.15"
+                  ],
+                  "type": "IP"
+                }
+            - name: example
+              manifest: |-
+                {
+                  "dynamic_proxy_type": "TorAnonymizer",
+                  "name": "TOR Blocker",
+                  "type": "DYNAMIC",
+                  "usage": "BLOCKLIST"
+                }
         argumentDocs:
             asns: '- (Optional) Array of Autonomous System Numbers (each element is a string representation of an ASN numeric value).'
             dynamic_locations: |-
@@ -1698,28 +2879,52 @@ resources:
             type: '- (Required) Type of the Network Zone - can either be "IP" or "DYNAMIC" only.'
             usage: '- (Optional) Usage of the Network Zone - can be either "POLICY" or "BLOCKLIST". By default, it is "POLICY".'
         importStatements: []
-    okta_org_configuration':
+    okta_org_configuration:
         subCategory: ""
         description: Manages org settings, logo, support and communication.
-        name: okta_org_configuration'
+        name: okta_org_configuration
         title: okta_org_configuration'
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "company_name": "Umbrella Corporation",
+                  "website": "https://terraform.io"
+                }
         argumentDocs: {}
         importStatements: []
-    okta_org_support':
+    okta_org_support:
         subCategory: ""
         description: Manages Okta Support access your org
-        name: okta_org_support'
+        name: okta_org_support
         title: okta_org_support'
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "extend_by": 1
+                }
         argumentDocs:
             expiration: '- Expiration of Okta Support'
             extend_by: '- (Optional) Number of days the support should be extended by in addition to the standard eight hours.'
             status: '- Status of Okta Support'
         importStatements: []
-    okta_policy_device_assurance_android':
+    okta_policy_device_assurance_android:
         subCategory: ""
         description: Manages a device assurance policy for android.
-        name: okta_policy_device_assurance_android'
+        name: okta_policy_device_assurance_android
         title: okta_policy_device_assurance_android'
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "disk_encryption_type": "${toset([\"FULL\", \"USER\"])}",
+                  "jailbreak": false,
+                  "name": "example",
+                  "os_version": "12",
+                  "screenlock_type": "${toset([\"BIOMETRIC\"])}",
+                  "secure_hardware_present": true
+                }
         argumentDocs:
             created_by: '- Created by of the device assurance policy.'
             created_date: '- Created date of the device assurance policy.'
@@ -1734,11 +2939,31 @@ resources:
             screenlock_type: '- (Optional) List of screen lock type of the device assurance policy.'
             secure_hardware_present: '- (Optional) Is the device secure with hardware in the device assurance policy.'
         importStatements: []
-    okta_policy_device_assurance_chromeos':
+    okta_policy_device_assurance_chromeos:
         subCategory: ""
         description: Manages a device assurance policy for chromeos.
-        name: okta_policy_device_assurance_chromeos'
+        name: okta_policy_device_assurance_chromeos
         title: okta_policy_device_assurance_chromeos'
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "name": "example",
+                  "tpsp_allow_screen_lock": true,
+                  "tpsp_browser_version": "15393.27.0",
+                  "tpsp_builtin_dns_client_enabled": true,
+                  "tpsp_chrome_remote_desktop_app_blocked": true,
+                  "tpsp_device_enrollment_domain": "exampleDomain",
+                  "tpsp_disk_encrypted": true,
+                  "tpsp_key_trust_level": "CHROME_OS_VERIFIED_MODE",
+                  "tpsp_os_firewall": true,
+                  "tpsp_os_version": "10.0.19041.1110",
+                  "tpsp_password_proctection_warning_trigger": "PASSWORD_PROTECTION_OFF",
+                  "tpsp_realtime_url_check_mode": true,
+                  "tpsp_safe_browsing_protection_level": "ENHANCED_PROTECTION",
+                  "tpsp_screen_lock_secured": true,
+                  "tpsp_site_isolation_enabled": true
+                }
         argumentDocs:
             created_by: '- Created by of the device assurance policy.'
             created_date: '- Created date of the device assurance policy.'
@@ -1762,11 +2987,20 @@ resources:
             tpsp_screen_lock_secured: '- (Optional) Third party signal provider screen lock secure.'
             tpsp_site_isolation_enabled: '- (Optional) Third party signal provider site isolation enabled.'
         importStatements: []
-    okta_policy_device_assurance_ios':
+    okta_policy_device_assurance_ios:
         subCategory: ""
         description: Manages a device assurance policy for ios.
-        name: okta_policy_device_assurance_ios'
+        name: okta_policy_device_assurance_ios
         title: okta_policy_device_assurance_ios'
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "jailbreak": false,
+                  "name": "example",
+                  "os_version": "12.4.5",
+                  "screenlock_type": "${toset([\"BIOMETRIC\"])}"
+                }
         argumentDocs:
             created_by: '- Created by of the device assurance policy.'
             created_date: '- Created date of the device assurance policy.'
@@ -1779,11 +3013,35 @@ resources:
             platform: '- Platform of the device assurance policy.'
             screenlock_type: '- (Optional) List of screen lock type of the device assurance policy.'
         importStatements: []
-    okta_policy_device_assurance_macos':
+    okta_policy_device_assurance_macos:
         subCategory: ""
         description: Manages a device assurance policy for macos.
-        name: okta_policy_device_assurance_macos'
+        name: okta_policy_device_assurance_macos
         title: okta_policy_device_assurance_macos'
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "disk_encryption_type": "${toset([\"ALL_INTERNAL_VOLUMES\"])}",
+                  "name": "example",
+                  "os_version": "12.4.6",
+                  "screenlock_type": "${toset([\"BIOMETRIC\", \"PASSCODE\"])}",
+                  "secure_hardware_present": true,
+                  "third_party_signal_providers": true,
+                  "tpsp_browser_version": "15393.27.0",
+                  "tpsp_builtin_dns_client_enabled": true,
+                  "tpsp_chrome_remote_desktop_app_blocked": true,
+                  "tpsp_device_enrollment_domain": "exampleDomain",
+                  "tpsp_disk_encrypted": true,
+                  "tpsp_key_trust_level": "CHROME_BROWSER_HW_KEY",
+                  "tpsp_os_firewall": true,
+                  "tpsp_os_version": "10.0.19041",
+                  "tpsp_password_proctection_warning_trigger": "PASSWORD_PROTECTION_OFF",
+                  "tpsp_realtime_url_check_mode": true,
+                  "tpsp_safe_browsing_protection_level": "ENHANCED_PROTECTION",
+                  "tpsp_screen_lock_secured": true,
+                  "tpsp_site_isolation_enabled": true
+                }
         argumentDocs:
             created_by: '- Created by of the device assurance policy.'
             created_date: '- Created date of the device assurance policy.'
@@ -1811,11 +3069,41 @@ resources:
             tpsp_screen_lock_secured: '- (Optional) Third party signal provider screen lock secure.'
             tpsp_site_isolation_enabled: '- (Optional) Third party signal provider site isolation enabled.'
         importStatements: []
-    okta_policy_device_assurance_windows':
+    okta_policy_device_assurance_windows:
         subCategory: ""
         description: Manages a device assurance policy for windows.
-        name: okta_policy_device_assurance_windows'
+        name: okta_policy_device_assurance_windows
         title: okta_policy_device_assurance_windows'
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "disk_encryption_type": "${toset([\"ALL_INTERNAL_VOLUMES\"])}",
+                  "name": "example",
+                  "os_version": "12.4.6",
+                  "screenlock_type": "${toset([\"BIOMETRIC\", \"PASSCODE\"])}",
+                  "secure_hardware_present": true,
+                  "third_party_signal_providers": true,
+                  "tpsp_browser_version": "15393.27.0",
+                  "tpsp_builtin_dns_client_enabled": true,
+                  "tpsp_chrome_remote_desktop_app_blocked": true,
+                  "tpsp_crowd_strike_agent_id": "exampleAgentId",
+                  "tpsp_crowd_strike_customer_id": "exampleCustomerId",
+                  "tpsp_device_enrollment_domain": "exampleDomain",
+                  "tpsp_disk_encrypted": true,
+                  "tpsp_key_trust_level": "CHROME_BROWSER_HW_KEY",
+                  "tpsp_os_firewall": true,
+                  "tpsp_os_version": "10.0.19041",
+                  "tpsp_password_proctection_warning_trigger": "PASSWORD_PROTECTION_OFF",
+                  "tpsp_realtime_url_check_mode": true,
+                  "tpsp_safe_browsing_protection_level": "ENHANCED_PROTECTION",
+                  "tpsp_screen_lock_secured": true,
+                  "tpsp_secure_boot_enabled": true,
+                  "tpsp_site_isolation_enabled": true,
+                  "tpsp_third_party_blocking_enabled": true,
+                  "tpsp_windows_machine_domain": "exampleMachineDomain",
+                  "tpsp_windows_user_domain": "exampleUserDomain"
+                }
         argumentDocs:
             created_by: '- Created by of the device assurance policy.'
             created_date: '- Created date of the device assurance policy.'
@@ -1849,11 +3137,46 @@ resources:
             tpsp_windows_machine_domain: '- (Optional) Third party signal provider windows machine domain.'
             tpsp_windows_user_domain: '- (Optional) Third party signal provider windows user domain.'
         importStatements: []
-    okta_policy_mfa':
+    okta_policy_mfa:
         subCategory: ""
         description: Creates an MFA Policy.
-        name: okta_policy_mfa'
+        name: okta_policy_mfa
         title: okta_policy_mfa'
+        examples:
+            - name: classic_example
+              manifest: |-
+                {
+                  "description": "Example MFA policy using Okta Classic engine with factors.",
+                  "groups_included": [
+                    "${data.okta_group.everyone.id}"
+                  ],
+                  "is_oie": false,
+                  "name": "MFA Policy Classic",
+                  "okta_otp": {
+                    "enroll": "REQUIRED"
+                  },
+                  "okta_password": {
+                    "enroll": "REQUIRED"
+                  },
+                  "status": "ACTIVE"
+                }
+            - name: oie_example
+              manifest: |-
+                {
+                  "description": "Example MFA policy that uses Okta Identity Engine (OIE) with authenticators",
+                  "groups_included": [
+                    "${data.okta_group.everyone.id}"
+                  ],
+                  "is_oie": true,
+                  "name": "MFA Policy OIE",
+                  "okta_password": {
+                    "enroll": "REQUIRED"
+                  },
+                  "okta_verify": {
+                    "enroll": "REQUIRED"
+                  },
+                  "status": "ACTIVE"
+                }
         argumentDocs:
             consent_type: |-
                 - (Optional) User consent type required before enrolling in the factor: "NONE" or "TERMS_OF_SERVICE". By default, it is "NONE".
@@ -1891,11 +3214,34 @@ resources:
             webauthn: '- (Optional) FIDO2 (WebAuthn) MFA policy settings (✓ OIE).'
             yubikey_token: '- (Optional) Yubikey Token MFA policy settings (✓ Classic, ✓ OIE).'
         importStatements: []
-    okta_policy_mfa_default':
+    okta_policy_mfa_default:
         subCategory: ""
         description: Configures default MFA Policy.
-        name: okta_policy_mfa_default'
+        name: okta_policy_mfa_default
         title: okta_policy_mfa_default'
+        examples:
+            - name: classic_example
+              manifest: |-
+                {
+                  "is_oie": false,
+                  "okta_otp": {
+                    "enroll": "REQUIRED"
+                  },
+                  "okta_password": {
+                    "enroll": "REQUIRED"
+                  }
+                }
+            - name: oie_example
+              manifest: |-
+                {
+                  "is_oie": true,
+                  "okta_password": {
+                    "enroll": "REQUIRED"
+                  },
+                  "okta_verify": {
+                    "enroll": "REQUIRED"
+                  }
+                }
         argumentDocs:
             consent_type: |-
                 - (Optional) User consent type required before enrolling in the factor: "NONE" or "TERMS_OF_SERVICE". By default, it is "NONE".
@@ -1932,11 +3278,23 @@ resources:
             webauthn: '- (Optional) FIDO2 (WebAuthn) MFA policy settings (✓ OIE).'
             yubikey_token: '- (Optional) Yubikey Token MFA policy settings (✓ Classic, ✓ OIE).'
         importStatements: []
-    okta_policy_password':
+    okta_policy_password:
         subCategory: ""
         description: Creates a Password Policy.
-        name: okta_policy_password'
+        name: okta_policy_password
         title: okta_policy_password'
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "description": "Example",
+                  "groups_included": [
+                    "${data.okta_group.everyone.id}"
+                  ],
+                  "name": "example",
+                  "password_history_count": 4,
+                  "status": "ACTIVE"
+                }
         argumentDocs:
             auth_provider: '- (Optional) Authentication Provider: "OKTA", "ACTIVE_DIRECTORY" or "LDAP". Default is "OKTA". Type "string"'
             call_recovery: '- (Optional) Enable or disable voice call password recovery: ACTIVE or INACTIVE.  Type "string"'
@@ -1970,11 +3328,14 @@ resources:
             sms_recovery: '- (Optional) Enable or disable SMS password recovery: ACTIVE or INACTIVE. Type "string"'
             status: '- (Optional) Policy Status: "ACTIVE" or "INACTIVE". Type "string"'
         importStatements: []
-    okta_policy_password_default':
+    okta_policy_password_default:
         subCategory: ""
         description: Configures default password policy.
-        name: okta_policy_password_default'
+        name: okta_policy_password_default
         title: okta_policy_password_default'
+        examples:
+            - name: default
+              manifest: '{}'
         argumentDocs:
             call_recovery: '- (Optional) Enable or disable voice call password recovery: ACTIVE or INACTIVE.'
             default_auth_provider: '- Default authentication provider.'
@@ -2016,21 +3377,40 @@ resources:
             sms_recovery: '- (Optional) Enable or disable SMS password recovery: ACTIVE or INACTIVE.'
             status: '- Default policy status.'
         importStatements: []
-    okta_policy_profile_enrollment':
+    okta_policy_profile_enrollment:
         subCategory: ""
         description: Creates a Profile Enrollment Policy
-        name: okta_policy_profile_enrollment'
+        name: okta_policy_profile_enrollment
         title: okta_policy_profile_enrollment'
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "name": "example",
+                  "status": "ACTIVE"
+                }
         argumentDocs:
             id: '- ID of the Policy.'
             name: '- (Required) Policy Name.'
             status: '- (Optional) Status of the policy.'
         importStatements: []
-    okta_policy_profile_enrollment_apps':
+    okta_policy_profile_enrollment_apps:
         subCategory: ""
         description: Manages Profile Enrollment Policy Apps
-        name: okta_policy_profile_enrollment_apps'
+        name: okta_policy_profile_enrollment_apps
         title: okta_policy_profile_enrollment_apps'
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "apps": [
+                    "${data.okta_app.id}"
+                  ],
+                  "policy_id": "${okta_policy.example.id}"
+                }
+              references:
+                apps: data.okta_app.id
+                policy_id: okta_policy.example.id
         argumentDocs:
             apps: '- (Optional) List of app IDs to be added to this policy.'
             default_policy_id: '- ID of the default enrollment policy.'
@@ -2040,11 +3420,59 @@ resources:
             id: '- ID of the enrollment policy.'
             policy_id: '- (Required) ID of the enrollment policy.'
         importStatements: []
-    okta_policy_rule_idp_discovery':
+    okta_policy_rule_idp_discovery:
         subCategory: ""
         description: Creates an IdP Discovery Policy Rule.
-        name: okta_policy_rule_idp_discovery'
+        name: okta_policy_rule_idp_discovery
         title: okta_policy_rule_idp_discovery'
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "app_exclude": [
+                    {
+                      "id": "\u003capp id\u003e",
+                      "type": "APP"
+                    },
+                    {
+                      "name": "yahoo_mail",
+                      "type": "APP_TYPE"
+                    }
+                  ],
+                  "app_include": [
+                    {
+                      "id": "\u003capp id\u003e",
+                      "type": "APP"
+                    },
+                    {
+                      "name": "\u003capp type name\u003e",
+                      "type": "APP_TYPE"
+                    }
+                  ],
+                  "idp_id": "\u003cidp id\u003e",
+                  "idp_type": "OIDC",
+                  "name": "example",
+                  "network_connection": "ANYWHERE",
+                  "platform_include": [
+                    {
+                      "os_type": "OSX",
+                      "type": "MOBILE"
+                    }
+                  ],
+                  "policy_id": "${data.okta_policy.idp_discovery_policy.id}",
+                  "priority": 1,
+                  "status": "ACTIVE",
+                  "user_identifier_attribute": "company",
+                  "user_identifier_patterns": [
+                    {
+                      "match_type": "EQUALS",
+                      "value": "Articulate"
+                    }
+                  ],
+                  "user_identifier_type": "ATTRIBUTE"
+                }
+              references:
+                policy_id: data.okta_policy.idp_discovery_policy.id
         argumentDocs:
             app_exclude: '- (Optional) Applications to exclude in discovery. See app_include for details.'
             app_include: '- (Optional) Applications to include in discovery rule.'
@@ -2068,11 +3496,123 @@ resources:
             user_identifier_type: '- (Optional) One of: "IDENTIFIER", "ATTRIBUTE"'
             value: '- (Optional) The regex or simple match string to match against.'
         importStatements: []
-    okta_policy_rule_mfa':
+    okta_policy_rule_mfa:
         subCategory: ""
         description: Creates an MFA Policy Rule.
-        name: okta_policy_rule_mfa'
+        name: okta_policy_rule_mfa
         title: okta_policy_rule_mfa'
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "app_include": [
+                    {
+                      "id": "${okta_app_oauth.example.id}",
+                      "type": "APP"
+                    },
+                    {
+                      "name": "yahoo_mail",
+                      "type": "APP_TYPE"
+                    }
+                  ],
+                  "enroll": "LOGIN",
+                  "name": "My Rule",
+                  "policy_id": "${data.okta_default_policy.example.id}",
+                  "status": "ACTIVE"
+                }
+              references:
+                app_include.id: okta_app_oauth.example.id
+                policy_id: data.okta_default_policy.example.id
+              dependencies:
+                okta_app_oauth.example: |-
+                    {
+                      "grant_types": [
+                        "authorization_code"
+                      ],
+                      "label": "My App",
+                      "redirect_uris": [
+                        "http://localhost:8000"
+                      ],
+                      "response_types": [
+                        "code"
+                      ],
+                      "skip_groups": true,
+                      "type": "web"
+                    }
+            - name: example
+              manifest: |-
+                {
+                  "app_exclude": [
+                    {
+                      "name": "okta",
+                      "type": "APP_TYPE"
+                    }
+                  ],
+                  "name": "Some policy rule",
+                  "policy_id": "${data.okta_default_policy.example.id}"
+                }
+              references:
+                policy_id: data.okta_default_policy.example.id
+            - name: example
+              manifest: |-
+                {
+                  "app_exclude": [
+                    {
+                      "name": "okta",
+                      "type": "APP_TYPE"
+                    }
+                  ],
+                  "app_include": [
+                    {
+                      "id": "some_app_id",
+                      "type": "APP"
+                    }
+                  ],
+                  "name": "Some policy rule",
+                  "policy_id": "${data.okta_default_policy.example.id}"
+                }
+              references:
+                policy_id: data.okta_default_policy.example.id
+            - name: example
+              manifest: |-
+                {
+                  "app_include": [
+                    {
+                      "name": "okta",
+                      "type": "APP_TYPE"
+                    }
+                  ],
+                  "name": "Some policy rule",
+                  "policy_id": "${data.okta_default_policy.example.id}"
+                }
+              references:
+                policy_id: data.okta_default_policy.example.id
+            - name: example
+              manifest: |-
+                {
+                  "name": "Some policy rule",
+                  "policy_id": "${data.okta_default_policy.example.id}"
+                }
+              references:
+                policy_id: data.okta_default_policy.example.id
+            - name: example
+              manifest: |-
+                {
+                  "app_include": [
+                    {
+                      "name": "okta",
+                      "type": "APP_TYPE"
+                    },
+                    {
+                      "id": "some_app_id",
+                      "type": "APP"
+                    }
+                  ],
+                  "name": "Some policy rule",
+                  "policy_id": "${data.okta_default_policy.example.id}"
+                }
+              references:
+                policy_id: data.okta_default_policy.example.id
         argumentDocs:
             app_exlcude: '- (Optional) Applications to exclude from the discovery rule. IMPORTANT: this field is only available in Classic Organizations.'
             app_include: '- (Optional) Applications to include in discovery rule. IMPORTANT: this field is only available in Classic Organizations.'
@@ -2106,11 +3646,66 @@ resources:
             status: '- (Optional) Policy Rule Status: "ACTIVE" or "INACTIVE". Type "string"'
             users_excluded: '- (Optional) The users to exclude. Type "set(string)"'
         importStatements: []
-    okta_policy_rule_profile_enrollment':
+    okta_policy_rule_profile_enrollment:
         subCategory: ""
         description: Creates a Profile Enrollment Policy Rule.
-        name: okta_policy_rule_profile_enrollment'
+        name: okta_policy_rule_profile_enrollment
         title: okta_policy_rule_profile_enrollment'
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "access": "ALLOW",
+                  "email_verification": true,
+                  "inline_hook_id": "${okta_inline_hook.example.id}",
+                  "policy_id": "${okta_policy_profile_enrollment.example.id}",
+                  "profile_attributes": [
+                    {
+                      "label": "Email",
+                      "name": "email",
+                      "required": true
+                    },
+                    {
+                      "label": "Name",
+                      "name": "name",
+                      "required": true
+                    },
+                    {
+                      "label": "T-Shirt Size",
+                      "name": "t-shirt",
+                      "required": false
+                    }
+                  ],
+                  "target_group_id": "${okta_group.example.id}",
+                  "unknown_user_action": "REGISTER"
+                }
+              references:
+                inline_hook_id: okta_inline_hook.example.id
+                policy_id: okta_policy_profile_enrollment.example.id
+                target_group_id: okta_group.example.id
+              dependencies:
+                okta_group.example: |-
+                    {
+                      "description": "Group of some users",
+                      "name": "My Group"
+                    }
+                okta_inline_hook.example: |-
+                    {
+                      "channel": {
+                        "method": "POST",
+                        "type": "HTTP",
+                        "uri": "https://example.com/test2",
+                        "version": "1.0.0"
+                      },
+                      "name": "My Inline Hook",
+                      "status": "ACTIVE",
+                      "type": "com.okta.user.pre-registration",
+                      "version": "1.0.3"
+                    }
+                okta_policy_profile_enrollment.example: |-
+                    {
+                      "name": "My Enrollment Policy"
+                    }
         argumentDocs:
             access: '- (Optional) Allow or deny access based on the rule conditions. Valid values are: "ALLOW", "DENY". Default is "ALLOW".'
             email_verification: '- (Optional) Indicates whether email verification should occur before access is granted. Default is true.'
@@ -2127,11 +3722,92 @@ resources:
             ui_schema_id: '- (Required if present) Value created by the backend. If present all policy updates must include this attribute/value.'
             unknown_user_action: '- (Required) Which action should be taken if this User is new. Valid values are: "DENY", "REGISTER".'
         importStatements: []
-    okta_policy_rule_signon':
+    okta_policy_rule_signon:
         subCategory: ""
         description: Creates a Sign On Policy Rule.
-        name: okta_policy_rule_signon'
+        name: okta_policy_rule_signon
         title: okta_policy_rule_signon'
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "access": "CHALLENGE",
+                  "authtype": "RADIUS",
+                  "behaviors": [
+                    "${data.okta_behavior.new_city.id}"
+                  ],
+                  "factor_sequence": [
+                    {
+                      "primary_criteria_factor_type": "token:hotp",
+                      "primary_criteria_provider": "CUSTOM",
+                      "secondary_criteria": [
+                        {
+                          "factor_type": "token:software:totp",
+                          "provider": "OKTA"
+                        },
+                        {
+                          "factor_type": "push",
+                          "provider": "OKTA"
+                        },
+                        {
+                          "factor_type": "password",
+                          "provider": "OKTA"
+                        },
+                        {
+                          "factor_type": "question",
+                          "provider": "OKTA"
+                        },
+                        {
+                          "factor_type": "sms",
+                          "provider": "OKTA"
+                        },
+                        {
+                          "factor_type": "token:software:totp",
+                          "provider": "GOOGLE"
+                        },
+                        {
+                          "factor_type": "email",
+                          "provider": "OKTA"
+                        },
+                        {
+                          "factor_type": "call",
+                          "provider": "OKTA"
+                        },
+                        {
+                          "factor_type": "webauthn",
+                          "provider": "FIDO"
+                        },
+                        {
+                          "factor_type": "token",
+                          "provider": "RSA"
+                        },
+                        {
+                          "factor_type": "token",
+                          "provider": "SYMANTEC"
+                        }
+                      ]
+                    },
+                    {
+                      "primary_criteria_factor_type": "token:software:totp",
+                      "primary_criteria_provider": "OKTA"
+                    }
+                  ],
+                  "name": "Example Policy Rule",
+                  "network_connection": "ANYWHERE",
+                  "policy_id": "${okta_policy_signon.example.id}",
+                  "risc_level": "HIGH",
+                  "status": "ACTIVE"
+                }
+              references:
+                behaviors: data.okta_behavior.new_city.id
+                policy_id: okta_policy_signon.example.id
+              dependencies:
+                okta_policy_signon.test: |-
+                    {
+                      "description": "Example Policy",
+                      "name": "Example Policy",
+                      "status": "ACTIVE"
+                    }
         argumentDocs:
             access: '- (Optional) Allow or deny access based on the rule conditions: "ALLOW", "DENY" or "CHALLENGE". The default is "ALLOW".'
             authtype: '- (Optional) Authentication entrypoint: "ANY", "LDAP_INTERFACE" or "RADIUS".'
@@ -2167,11 +3843,22 @@ resources:
             status: '- (Optional) Policy Rule Status: "ACTIVE" or "INACTIVE".'
             users_excluded: '- (Optional) The list of user IDs that would be excluded when rules are processed.'
         importStatements: []
-    okta_policy_signon':
+    okta_policy_signon:
         subCategory: ""
         description: Creates a Sign On Policy.
-        name: okta_policy_signon'
+        name: okta_policy_signon
         title: okta_policy_signon'
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "description": "Example",
+                  "groups_included": [
+                    "${data.okta_group.everyone.id}"
+                  ],
+                  "name": "example",
+                  "status": "ACTIVE"
+                }
         argumentDocs:
             description: '- (Optional) Policy Description.'
             groups_included: '- List of Group IDs to Include.'
@@ -2180,11 +3867,37 @@ resources:
             priority: '- (Optional) Priority of the policy.'
             status: '- (Optional) Policy Status: "ACTIVE" or "INACTIVE".'
         importStatements: []
-    okta_profile_mapping':
+    okta_profile_mapping:
         subCategory: ""
         description: Manages a profile mapping.
-        name: okta_profile_mapping'
+        name: okta_profile_mapping
         title: okta_profile_mapping'
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "delete_when_absent": true,
+                  "mappings": [
+                    {
+                      "expression": "appuser.firstName",
+                      "id": "firstName"
+                    },
+                    {
+                      "expression": "appuser.lastName",
+                      "id": "lastName"
+                    },
+                    {
+                      "expression": "appuser.email",
+                      "id": "email"
+                    },
+                    {
+                      "expression": "appuser.email",
+                      "id": "login"
+                    }
+                  ],
+                  "source_id": "\u003csource id\u003e",
+                  "target_id": "${data.okta_user_profile_mapping_source.user.id}"
+                }
         argumentDocs:
             always_apply: (Optional) Whether apply the changes to all users with this profile after updating or creating the these mappings.
             delete_when_absent: '- (Optional) Tells the provider whether to attempt to delete missing mappings under profile mapping.'
@@ -2199,11 +3912,19 @@ resources:
             target_name: '- Name of the mapping target.'
             target_type: '- ID of the mapping target.'
         importStatements: []
-    okta_rate_limiting':
+    okta_rate_limiting:
         subCategory: ""
         description: Manages rate limiting.
-        name: okta_rate_limiting'
+        name: okta_rate_limiting
         title: okta_rate_limiting'
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "authorize": "ENFORCE",
+                  "communications_enabled": true,
+                  "login": "ENFORCE"
+                }
         argumentDocs:
             authorize: |-
                 - (Required) Called during authentication. Valid values: "ENFORCE" (Enforce limit and
@@ -2213,11 +3934,23 @@ resources:
                 - (Required) Called when accessing the Okta hosted login page. Valid values: "ENFORCE" (Enforce limit and
                 log per client (recommended)), "DISABLE" (Do nothing (not recommended)), "PREVIEW" (Log per client).
         importStatements: []
-    okta_resource_set':
+    okta_resource_set:
         subCategory: ""
         description: Manages Resource Sets as custom collections of resources.
-        name: okta_resource_set'
+        name: okta_resource_set
         title: okta_resource_set'
+        examples:
+            - name: test
+              manifest: |-
+                {
+                  "description": "All the users, app and groups",
+                  "label": "UsersAppsAndGroups",
+                  "resources": [
+                    "${format(\"%s/api/v1/users\", local.org_url)}",
+                    "${format(\"%s/api/v1/apps\", local.org_url)}",
+                    "${format(\"%s/api/v1/groups\", local.org_url)}"
+                  ]
+                }
         argumentDocs:
             description: '- (Required) A description of the Resource Set.'
             id: '- ID of the resource set.'
@@ -2226,11 +3959,19 @@ resources:
                 - (Optional) The endpoints that reference the resources to be included in the new Resource Set. At least one
                 endpoint must be specified when creating resource set.
         importStatements: []
-    okta_role_subscription':
+    okta_role_subscription:
         subCategory: ""
         description: Manages group subscription.
-        name: okta_role_subscription'
+        name: okta_role_subscription
         title: okta_role_subscription'
+        examples:
+            - name: test
+              manifest: |-
+                {
+                  "notification_type": "APP_IMPORT",
+                  "role_type": "SUPER_ADMIN",
+                  "status": "unsubscribed"
+                }
         argumentDocs:
             '"AD_AGENT"': '- Disconnects and reconnects: AD agent.'
             '"AGENT_AUTO_UPDATE_NOTIFICATION"': '- Agent auto-update notifications: AD Agent.'
@@ -2263,11 +4004,21 @@ resources:
                 . See API docs
             status: '- (Optional) Subscription status. Valid values: "subscribed", "unsubscribed".'
         importStatements: []
-    okta_security_notification_emails':
+    okta_security_notification_emails:
         subCategory: ""
         description: Manages Security Notification Emails
-        name: okta_security_notification_emails'
+        name: okta_security_notification_emails
         title: okta_security_notification_emails'
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "report_suspicious_activity_enabled": true,
+                  "send_email_for_factor_enrollment_enabled": true,
+                  "send_email_for_factor_reset_enabled": true,
+                  "send_email_for_new_device_enabled": true,
+                  "send_email_for_password_changed_enabled": true
+                }
         argumentDocs:
             report_suspicious_activity_enabled: (Optional) - Notifies end users about suspicious or unrecognized activity from their account. Default is true.
             send_email_for_factor_enrollment_enabled: (Optional) - Notifies end users of any activity on their account related to MFA factor enrollment. Default is true.
@@ -2275,11 +4026,28 @@ resources:
             send_email_for_new_device_enabled: (Optional) - Notifies end users about new sign-on activity. Default is true.
             send_email_for_password_changed_enabled: (Optional) - Notifies end users that the password for their account has changed. Default is true.
         importStatements: []
-    okta_template_sms':
+    okta_template_sms:
         subCategory: ""
         description: Creates an Okta SMS Template.
-        name: okta_template_sms'
+        name: okta_template_sms
         title: okta_template_sms'
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "template": "Your ${org.name} code is: ${code}",
+                  "translations": [
+                    {
+                      "language": "en",
+                      "template": "Your ${org.name} code is: ${code}"
+                    },
+                    {
+                      "language": "es",
+                      "template": "Tu código de ${org.name} es: ${code}."
+                    }
+                  ],
+                  "type": "SMS_VERIFY_CODE"
+                }
         argumentDocs:
             id: '- ID of the SMS Template.'
             language: '- (Required) The language to map the template to.'
@@ -2287,11 +4055,26 @@ resources:
             translations: '- (Required) Set of translations for a particular template.'
             type: '- (Required) SMS template type'
         importStatements: []
-    okta_theme':
+    okta_theme:
         subCategory: ""
         description: Gets, updates, a single Theme of a Brand of an Okta Organization.
-        name: okta_theme'
+        name: okta_theme
         title: okta_theme'
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "background_image": "path/to/background.png",
+                  "brand_id": "${tolist(data.okta_brands.test.brands)[0].id}",
+                  "email_template_touch_point_variant": "OKTA_DEFAULT",
+                  "end_user_dashboard_touch_point_variant": "OKTA_DEFAULT",
+                  "error_page_touch_point_variant": "OKTA_DEFAULT",
+                  "favicon": "path/to/favicon.png",
+                  "logo": "path/to/logo.png",
+                  "primary_color_hex": "#1662dd",
+                  "secondary_color_hex": "#ebebed",
+                  "sign_in_page_touch_point_variant": "OKTA_DEFAULT"
+                }
         argumentDocs:
             background_image: '- (Optional) Local path to background image file. Setting the value to the blank string "" will delete the favicon on the theme at Okta but will not delete the local file.'
             background_image_url: '- (Read-Only) Background image URL'
@@ -2312,11 +4095,36 @@ resources:
             sign_in_page_touch_point_variant: '- (Required) Variant for the Okta Sign-In Page. Valid values: (OKTA_DEFAULT, BACKGROUND_SECONDARY_COLOR, BACKGROUND_IMAGE)'
             theme_id: '- (Optional) Theme ID, used for read (faux-create)'
         importStatements: []
-    okta_threat_insight_settings':
+    okta_threat_insight_settings:
         subCategory: ""
         description: Manages Okta Threat Insight Settings
-        name: okta_threat_insight_settings'
+        name: okta_threat_insight_settings
         title: okta_threat_insight_settings'
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "action": "block",
+                  "network_excludes": [
+                    "${okta_network_zone.ip_network_zone_example.id}"
+                  ]
+                }
+              references:
+                network_excludes: okta_network_zone.ip_network_zone_example.id
+              dependencies:
+                okta_network_zone.ip_network_zone_example: |-
+                    {
+                      "gateways": [
+                        "1.2.3.4/24",
+                        "2.3.4.5-2.3.4.15"
+                      ],
+                      "name": "example",
+                      "proxies": [
+                        "2.2.3.4/24",
+                        "3.3.4.5-3.3.4.15"
+                      ],
+                      "type": "IP"
+                    }
         argumentDocs:
             action: |-
                 - (Required) Specifies how Okta responds to authentication requests from suspicious IPs. Valid values
@@ -2329,11 +4137,21 @@ resources:
                 This ensures that traffic from known, trusted IPs isn't accidentally logged or blocked. The ordering of the network zone
                 is not guarantee from the API sides
         importStatements: []
-    okta_trusted_origin':
+    okta_trusted_origin:
         subCategory: ""
         description: Creates a Trusted Origin.
-        name: okta_trusted_origin'
+        name: okta_trusted_origin
         title: okta_trusted_origin'
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "name": "example",
+                  "origin": "https://example.com",
+                  "scopes": [
+                    "CORS"
+                  ]
+                }
         argumentDocs:
             active: '- (Optional) Whether the Trusted Origin is active or not - can only be issued post-creation. By default, it is ''true''.'
             id: '- The ID of the Trusted Origin.'
@@ -2341,11 +4159,56 @@ resources:
             origin: '- (Required) Unique origin URL for this trusted origin.'
             scopes: '- (Required) Scopes of the Trusted Origin - can be "CORS" and/or "REDIRECT".'
         importStatements: []
-    okta_user':
+    okta_user:
         subCategory: ""
         description: Creates an Okta User.
-        name: okta_user'
+        name: okta_user
         title: okta_user'
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "city": "New York",
+                  "cost_center": "10",
+                  "country_code": "US",
+                  "department": "IT",
+                  "display_name": "Dr. John Smith",
+                  "division": "Acquisitions",
+                  "email": "john.smith@example.com",
+                  "employee_number": "111111",
+                  "first_name": "John",
+                  "honorific_prefix": "Dr.",
+                  "honorific_suffix": "Jr.",
+                  "last_name": "Smith",
+                  "locale": "en_US",
+                  "login": "john.smith@example.com",
+                  "manager": "Jimbo",
+                  "manager_id": "222222",
+                  "middle_name": "John",
+                  "mobile_phone": "1112223333",
+                  "nick_name": "Johnny",
+                  "organization": "Testing Inc.",
+                  "postal_address": "1234 Testing St.",
+                  "preferred_language": "en-us",
+                  "primary_phone": "4445556666",
+                  "profile_url": "https://www.example.com/profile",
+                  "second_email": "john.smith.fun@example.com",
+                  "state": "NY",
+                  "street_address": "5678 Testing Ave.",
+                  "timezone": "America/New_York",
+                  "title": "Director",
+                  "user_type": "Employee",
+                  "zip_code": "11111"
+                }
+            - name: test2
+              manifest: |-
+                {
+                  "email": "example@example.com",
+                  "first_name": "John",
+                  "last_name": "Smith",
+                  "login": "example@example.com",
+                  "password_inline_hook": "default"
+                }
         argumentDocs:
             algorithm": '- (Required) The algorithm used to generate the hash using the password (and salt, when applicable). Must be set to BCRYPT, SHA-512, SHA-256, SHA-1 or MD5.'
             city: '- (Optional) User profile property.'
@@ -2444,11 +4307,21 @@ resources:
                 administrator emails. These admins also won't have access to contact Okta Support and open support cases on behalf of your org.
             user_id: '- (Required) Okta user ID.'
         importStatements: []
-    okta_user_base_schema':
+    okta_user_base_schema:
         subCategory: ""
         description: Manages a User Base Schema property.
-        name: okta_user_base_schema'
+        name: okta_user_base_schema
         title: okta_user_base_schema'
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "index": "customPropertyName",
+                  "master": "OKTA",
+                  "title": "customPropertyName",
+                  "type": "string",
+                  "user_type": "${data.okta_user_type.example.id}"
+                }
         argumentDocs:
             index: '- (Required) The property name.'
             master: '- (Optional) Master priority for the user schema property. It can be set to "PROFILE_MASTER" or "OKTA".'
@@ -2459,11 +4332,22 @@ resources:
             type: '- (Required) The type of the schema property. It can be "string", "boolean", "number", "integer", "array", or "object".'
             user_type: '- (Optional) User type ID'
         importStatements: []
-    okta_user_base_schema_property':
+    okta_user_base_schema_property:
         subCategory: ""
         description: Manages a User Base Schema property.
-        name: okta_user_base_schema_property'
+        name: okta_user_base_schema_property
         title: okta_user_base_schema_property'
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "index": "firstName",
+                  "master": "OKTA",
+                  "required": true,
+                  "title": "First name",
+                  "type": "string",
+                  "user_type": "${data.okta_user_type.example.id}"
+                }
         argumentDocs:
             index: '- (Required) The property name.'
             master: '- (Optional) Master priority for the user schema property. It can be set to "PROFILE_MASTER" or "OKTA".'
@@ -2474,11 +4358,38 @@ resources:
             type: '- (Required) The type of the schema property. It can be "string", "boolean", "number", "integer", "array", or "object".'
             user_type: '- (Optional) User type ID.'
         importStatements: []
-    okta_user_factor_question':
+    okta_user_factor_question:
         subCategory: ""
         description: Creates security question factor for a user.
-        name: okta_user_factor_question'
+        name: okta_user_factor_question
         title: okta_user_factor_question'
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "answer": "meatball",
+                  "depends_on": [
+                    "${okta_factor.example}"
+                  ],
+                  "key": "${data.okta_user_security_questions.example.questions[0].key}",
+                  "user_id": "${okta_user.example.id}"
+                }
+              references:
+                key: data.okta_user_security_questions.example.questions[0].key
+                user_id: okta_user.example.id
+              dependencies:
+                okta_factor.example: |-
+                    {
+                      "active": true,
+                      "provider_id": "okta_question"
+                    }
+                okta_user.example: |-
+                    {
+                      "email": "john.smith@example.com",
+                      "first_name": "John",
+                      "last_name": "Smith",
+                      "login": "john.smith@example.com"
+                    }
         argumentDocs:
             answer: '- (Required) Security question answer. Note here that answer won''t be set during the resource import.'
             id: '- ID of the security question factor.'
@@ -2503,6 +4414,7 @@ resources:
                   "user_id": "${okta_user.test.id}"
                 }
               references:
+                groups: okta_group.test_1.id
                 user_id: okta_user.test.id
               dependencies:
                 okta_user.test: |-
@@ -2516,11 +4428,23 @@ resources:
             groups: '- (Required) The list of Okta group IDs which the user should have membership managed for.'
             user_id: '- (Required) Okta user ID.'
         importStatements: []
-    okta_user_schema':
+    okta_user_schema:
         subCategory: ""
         description: Creates a User Schema property.
-        name: okta_user_schema'
+        name: okta_user_schema
         title: okta_user_schema'
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "description": "My custom property name",
+                  "index": "customPropertyName",
+                  "master": "OKTA",
+                  "scope": "SELF",
+                  "title": "customPropertyName",
+                  "type": "string",
+                  "user_type": "${data.okta_user_type.example.id}"
+                }
         argumentDocs:
             array_enum: '- (Optional) Array of values that an array property''s items can be set to.'
             array_one_of: '- (Optional) Display name and value an enum array can be set to.'
@@ -2545,11 +4469,23 @@ resources:
             user_type: '- (Optional) User type ID'
             value: '- (Required) - ID of profile source.'
         importStatements: []
-    okta_user_schema_property':
+    okta_user_schema_property:
         subCategory: ""
         description: Creates a User Schema property.
-        name: okta_user_schema_property'
+        name: okta_user_schema_property
         title: okta_user_schema_property'
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "description": "My custom property name",
+                  "index": "customPropertyName",
+                  "master": "OKTA",
+                  "scope": "SELF",
+                  "title": "customPropertyName",
+                  "type": "string",
+                  "user_type": "${data.okta_user_type.example.id}"
+                }
         argumentDocs:
             array_enum: '- (Optional) Array of values that an array property''s items can be set to.'
             array_one_of: '- (Optional) Display name and value an enum array can be set to.'
@@ -2574,11 +4510,19 @@ resources:
             user_type: '- (Optional) User type ID'
             value: '- (Required) - ID of profile source.'
         importStatements: []
-    okta_user_type':
+    okta_user_type:
         subCategory: ""
         description: Creates a User Type.
-        name: okta_user_type'
+        name: okta_user_type
         title: okta_user_type'
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "description": "example",
+                  "display_name": "example",
+                  "name": "example"
+                }
         argumentDocs:
             description: '- (Optional) Description of the User Type.'
             display_name: '- (Required) Display Name of the User Type.'

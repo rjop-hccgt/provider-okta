@@ -1,0 +1,12 @@
+apiVersion: app.okta.upbound.io/v1alpha1
+kind: Bookmark
+metadata:
+  annotations:
+    meta.upbound.io/example-id: app/v1alpha1/bookmark
+  labels:
+    testing.upbound.io/example-name: example
+  name: example
+spec:
+  forProvider:
+    label: Example
+    url: https://example.com

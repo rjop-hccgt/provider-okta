@@ -1,0 +1,16 @@
+apiVersion: user.okta.upbound.io/v1alpha1
+kind: BaseSchemaProperty
+metadata:
+  annotations:
+    meta.upbound.io/example-id: user/v1alpha1/baseschemaproperty
+  labels:
+    testing.upbound.io/example-name: example
+  name: example
+spec:
+  forProvider:
+    index: firstName
+    master: OKTA
+    required: true
+    title: First name
+    type: string
+    userType: ${data.okta_user_type.example.id}

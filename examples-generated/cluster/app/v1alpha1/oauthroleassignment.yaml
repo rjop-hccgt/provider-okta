@@ -1,0 +1,34 @@
+apiVersion: app.okta.upbound.io/v1alpha1
+kind: OauthRoleAssignment
+metadata:
+  annotations:
+    meta.upbound.io/example-id: app/v1alpha1/oauthroleassignment
+  labels:
+    testing.upbound.io/example-name: test
+  name: test
+spec:
+  forProvider:
+    clientIdSelector:
+      matchLabels:
+        testing.upbound.io/example-name: test
+    type: HELP_DESK_ADMIN
+
+---
+
+apiVersion: app.okta.upbound.io/v1alpha1
+kind: Oauth
+metadata:
+  annotations:
+    meta.upbound.io/example-id: app/v1alpha1/oauthroleassignment
+  labels:
+    testing.upbound.io/example-name: test
+  name: test
+spec:
+  forProvider:
+    grantTypes:
+    - client_credentials
+    jwksUri: https://example.com
+    label: test
+    responseTypes:
+    - token
+    type: service

@@ -1,0 +1,20 @@
+apiVersion: auth.okta.m.upbound.io/v1alpha1
+kind: ServerPolicy
+metadata:
+  annotations:
+    meta.upbound.io/example-id: auth/v1alpha1/serverpolicy
+  labels:
+    testing.upbound.io/example-name: example
+  name: example
+  namespace: crossplane-system
+spec:
+  forProvider:
+    authServerIdSelector:
+      matchLabels:
+        testing.upbound.io/example-name: example
+    clientWhitelist:
+    - ALL_CLIENTS
+    description: example
+    name: example
+    priority: 1
+    status: ACTIVE

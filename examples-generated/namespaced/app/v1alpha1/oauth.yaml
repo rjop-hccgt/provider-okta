@@ -1,0 +1,19 @@
+apiVersion: app.okta.m.upbound.io/v1alpha1
+kind: Oauth
+metadata:
+  annotations:
+    meta.upbound.io/example-id: app/v1alpha1/oauth
+  labels:
+    testing.upbound.io/example-name: example
+  name: example
+  namespace: crossplane-system
+spec:
+  forProvider:
+    grantTypes:
+    - authorization_code
+    label: example
+    redirectUris:
+    - https://example.com/
+    responseTypes:
+    - code
+    type: web

@@ -1,0 +1,19 @@
+apiVersion: app.okta.m.upbound.io/v1alpha1
+kind: GroupAssignment
+metadata:
+  annotations:
+    meta.upbound.io/example-id: app/v1alpha1/groupassignment
+  labels:
+    testing.upbound.io/example-name: example
+  name: example
+  namespace: crossplane-system
+spec:
+  forProvider:
+    appId: <app id>
+    groupIdSelector:
+      matchLabels:
+        testing.upbound.io/example-name: example
+    profile: |
+      {
+        "<app_profile_field>": "<value>"
+      }

@@ -1,0 +1,34 @@
+apiVersion: user.okta.m.upbound.io/v1alpha1
+kind: AdminRoles
+metadata:
+  annotations:
+    meta.upbound.io/example-id: user/v1alpha1/adminroles
+  labels:
+    testing.upbound.io/example-name: test
+  name: test
+  namespace: crossplane-system
+spec:
+  forProvider:
+    adminRoles:
+    - APP_ADMIN
+    userIdSelector:
+      matchLabels:
+        testing.upbound.io/example-name: test
+
+---
+
+apiVersion: user.okta.m.upbound.io/v1alpha1
+kind: User
+metadata:
+  annotations:
+    meta.upbound.io/example-id: user/v1alpha1/adminroles
+  labels:
+    testing.upbound.io/example-name: test
+  name: test
+  namespace: crossplane-system
+spec:
+  forProvider:
+    email: testAcc-replace_with_uuid@example.com
+    firstName: TestAcc
+    lastName: Smith
+    login: testAcc-replace_with_uuid@example.com

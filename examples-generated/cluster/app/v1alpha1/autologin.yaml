@@ -1,0 +1,15 @@
+apiVersion: app.okta.upbound.io/v1alpha1
+kind: AutoLogin
+metadata:
+  annotations:
+    meta.upbound.io/example-id: app/v1alpha1/autologin
+  labels:
+    testing.upbound.io/example-name: example
+  name: example
+spec:
+  forProvider:
+    credentialsScheme: EDIT_USERNAME_AND_PASSWORD
+    label: Example App
+    revealPassword: true
+    signOnRedirectUrl: https://example.com
+    signOnUrl: https://example.com/login.html

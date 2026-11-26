@@ -1,0 +1,42 @@
+apiVersion: app.okta.upbound.io/v1alpha1
+kind: SAMLAppSettings
+metadata:
+  annotations:
+    meta.upbound.io/example-id: app/v1alpha1/samlappsettings
+  labels:
+    testing.upbound.io/example-name: test
+  name: test
+spec:
+  forProvider:
+    appIdSelector:
+      matchLabels:
+        testing.upbound.io/example-name: test
+    settings: |-
+      ${jsonencode(
+        {
+          "appFilter" : "okta",
+          "awsEnvironmentType" : "aws.amazon",
+          "groupFilter" : "aws_(?{{accountid}}\\\\d+)_(?{{role}}[a-zA-Z0-9+=,.@\\\\-_]+)",
+          "joinAllRoles" : false,
+          "loginURL" : "https://console.aws.amazon.com/ec2/home",
+          "roleValuePattern" : "arn:aws:iam::$${accountid}:saml-provider/OKTA,arn:aws:iam::$${accountid}:role/$${role}",
+          "sessionDuration" : 3200,
+          "useGroupMapping" : false
+        }
+        )}
+
+---
+
+apiVersion: app.okta.upbound.io/v1alpha1
+kind: SAML
+metadata:
+  annotations:
+    meta.upbound.io/example-id: app/v1alpha1/samlappsettings
+  labels:
+    testing.upbound.io/example-name: test
+  name: test
+spec:
+  forProvider:
+    label: Amazon AWS
+    preconfiguredApp: amazon_aws
+    status: ACTIVE

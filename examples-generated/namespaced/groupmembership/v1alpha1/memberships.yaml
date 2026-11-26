@@ -1,0 +1,33 @@
+apiVersion: groupmembership.okta.m.upbound.io/v1alpha1
+kind: Memberships
+metadata:
+  annotations:
+    meta.upbound.io/example-id: groupmembership/v1alpha1/memberships
+  labels:
+    testing.upbound.io/example-name: test
+  name: test
+  namespace: crossplane-system
+spec:
+  forProvider:
+    groupIdSelector:
+      matchLabels:
+        testing.upbound.io/example-name: test
+    usersRefs:
+    - name: test1
+    - name: test2
+
+---
+
+apiVersion: group.okta.m.upbound.io/v1alpha1
+kind: Group
+metadata:
+  annotations:
+    meta.upbound.io/example-id: groupmembership/v1alpha1/memberships
+  labels:
+    testing.upbound.io/example-name: test
+  name: test
+  namespace: crossplane-system
+spec:
+  forProvider:
+    description: testing, testing
+    name: testAcc_replace_with_uuid

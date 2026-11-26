@@ -1,0 +1,28 @@
+apiVersion: idp.okta.upbound.io/v1alpha1
+kind: Oidc
+metadata:
+  annotations:
+    meta.upbound.io/example-id: idp/v1alpha1/oidc
+  labels:
+    testing.upbound.io/example-name: example
+  name: example
+spec:
+  forProvider:
+    authorizationBinding: HTTP-REDIRECT
+    authorizationUrl: https://idp.example.com/authorize
+    clientId: efg456
+    clientSecretSecretRef:
+      key: example-key
+      name: example-secret
+      namespace: upbound-system
+    issuerUrl: https://id.example.com
+    jwksBinding: HTTP-REDIRECT
+    jwksUrl: https://idp.example.com/keys
+    name: example
+    scopes:
+    - openid
+    tokenBinding: HTTP-POST
+    tokenUrl: https://idp.example.com/token
+    userInfoBinding: HTTP-REDIRECT
+    userInfoUrl: https://idp.example.com/userinfo
+    usernameTemplate: idpuser.email

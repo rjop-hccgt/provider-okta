@@ -1,0 +1,17 @@
+apiVersion: admin.okta.upbound.io/v1alpha1
+kind: RoleTargets
+metadata:
+  annotations:
+    meta.upbound.io/example-id: admin/v1alpha1/roletargets
+  labels:
+    testing.upbound.io/example-name: example
+  name: example
+spec:
+  forProvider:
+    apps:
+    - oidc_client.<app_id>
+    - facebook
+    roleType: APP_ADMIN
+    userIdSelector:
+      matchLabels:
+        testing.upbound.io/example-name: example

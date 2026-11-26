@@ -3,4 +3,4 @@ kind: Provider
 metadata:
   name: provider-okta
 spec:
-  package: healthcarecom/provider-okta:v0.1.0
+  package: xpkg.upbound.io/crossplane-contrib/provider-okta:v0.1.0

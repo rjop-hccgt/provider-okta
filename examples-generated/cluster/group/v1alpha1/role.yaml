@@ -1,0 +1,14 @@
+apiVersion: group.okta.upbound.io/v1alpha1
+kind: Role
+metadata:
+  annotations:
+    meta.upbound.io/example-id: group/v1alpha1/role
+  labels:
+    testing.upbound.io/example-name: example
+  name: example
+spec:
+  forProvider:
+    groupIdSelector:
+      matchLabels:
+        testing.upbound.io/example-name: example
+    roleType: READ_ONLY_ADMIN

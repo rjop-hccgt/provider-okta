@@ -1,0 +1,1001 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.20.1
+  name: users.user.okta.m.upbound.io
+spec:
+  group: user.okta.m.upbound.io
+  names:
+    categories:
+    - crossplane
+    - managed
+    - okta
+    kind: User
+    listKind: UserList
+    plural: users
+    singular: user
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .status.conditions[?(@.type=='Synced')].status
+      name: SYNCED
+      type: string
+    - jsonPath: .status.conditions[?(@.type=='Ready')].status
+      name: READY
+      type: string
+    - jsonPath: .metadata.annotations.crossplane\.io/external-name
+      name: EXTERNAL-NAME
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: AGE
+      type: date
+    name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: User is the Schema for the Users API. Creates an Okta User.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: UserSpec defines the desired state of User
+            properties:
+              forProvider:
+                properties:
+                  city:
+                    description: |-
+                      User profile property.
+                      User city
+                    type: string
+                  costCenter:
+                    description: |-
+                      User profile property.
+                      User cost center
+                    type: string
+                  countryCode:
+                    description: |-
+                      User profile property.
+                      User country code
+                    type: string
+                  customProfileAttributes:
+                    description: |-
+                      raw JSON containing all custom profile attributes.
+                      JSON formatted custom attributes for a user. It must be JSON due to various types Okta allows.
+                    type: string
+                  customProfileAttributesToIgnore:
+                    items:
+                      type: string
+                    type: array
+                    x-kubernetes-list-type: set
+                  department:
+                    description: |-
+                      User profile property.
+                      User department
+                    type: string
+                  displayName:
+                    description: |-
+                      User profile property.
+                      User display name, suitable to show end users
+                    type: string
+                  division:
+                    description: |-
+                      User profile property.
+                      User division
+                    type: string
+                  email:
+                    description: |-
+                      User profile property.
+                      User primary email address
+                    type: string
+                  employeeNumber:
+                    description: |-
+                      User profile property.
+                      User employee number
+                    type: string
+                  expirePasswordOnCreate:
+                    description: |-
+                      If set to true, the user will have to change the password at the next login. This property will be used
+                      when user is being created and works only when password field is set. Default is false.
+                      If set to `true`, the user will have to change the password at the next login. This property will be used when user is being created and works only when `password` field is set
+                    type: boolean
+                  firstName:
+                    description: |-
+                      User's First Name, required by default.
+                      User first name
+                    type: string
+                  honorificPrefix:
+                    description: |-
+                      User profile property.
+                      User honorific prefix
+                    type: string
+                  honorificSuffix:
+                    description: |-
+                      User profile property.
+                      User honorific suffix
+                    type: string
+                  lastName:
+                    description: |-
+                      User's Last Name, required by default.
+                      User last name
+                    type: string
+                  locale:
+                    description: |-
+                      User profile property.
+                      User default location
+                    type: string
+                  login:
+                    description: |-
+                      User profile property.
+                      User Okta login
+                    type: string
+                  manager:
+                    description: |-
+                      User profile property.
+                      Manager of User
+                    type: string
+                  managerId:
+                    description: |-
+                      User profile property.
+                      Manager ID of User
+                    type: string
+                  middleName:
+                    description: |-
+                      User profile property.
+                      User middle name
+                    type: string
+                  mobilePhone:
+                    description: |-
+                      User profile property.
+                      User mobile phone number
+                    type: string
+                  nickName:
+                    description: |-
+                      User profile property.
+                      User nickname
+                    type: string
+                  oldPasswordSecretRef:
+                    description: |-
+                      Old user password. IMPORTANT: Should be ONLY set in case the password was changed
+                      outside the provider. After successful password change this field should be removed and password field should be used
+                      for further changes.
+                      Old User Password. Should be only set in case the password was not changed using the provider
+                    properties:
+                      key:
+                        type: string
+                      name:
+                        description: Name of the secret.
+                        type: string
+                    required:
+                    - key
+                    - name
+                    type: object
+                  organization:
+                    description: |-
+                      User profile property.
+                      User organization
+                    type: string
+                  passwordHash:
+                    description: Specifies a hashed password to import into Okta.
+                    items:
+                      properties:
+                        algorithm:
+                          description: The algorithm used to generate the hash using
+                            the password
+                          type: string
+                        salt:
+                          description: |-
+                            Only required for salted hashes. For BCRYPT, this specifies the radix64-encoded salt used to generate
+                            the hash, which must be 22 characters long. For other salted hashes, this specifies the base64-encoded salt used to generate the hash.
+                            Only required for salted hashes
+                          type: string
+                        saltOrder:
+                          description: |-
+                            Specifies whether salt was pre- or postfixed to the password before hashing. Only required for salted algorithms.
+                            Specifies whether salt was pre- or postfixed to the password before hashing
+                          type: string
+                        value:
+                          description: |-
+                            For SHA-512, SHA-256, SHA-1, MD5, this is the actual base64-encoded hash of the password (and salt, if used).
+                            This is the Base64 encoded value of the SHA-512/SHA-256/SHA-1/MD5 digest that was computed by either pre-fixing or post-fixing
+                            the salt to the password, depending on the saltOrder. If a salt was not used in the source system, then this should just be
+                            the Base64 encoded value of the password's SHA-512/SHA-256/SHA-1/MD5 digest. For BCRYPT, This is the actual radix64-encoded hashed password.
+                            For SHA-512, SHA-256, SHA-1, MD5, This is the actual base64-encoded hash of the password (and salt, if used). This is the Base64 encoded value of the SHA-512/SHA-256/SHA-1/MD5 digest that was computed by either pre-fixing or post-fixing the salt to the password, depending on the saltOrder. If a salt was not used in the source system, then this should just be the the Base64 encoded value of the password's SHA-512/SHA-256/SHA-1/MD5 digest. For BCRYPT, This is the actual radix64-encoded hashed password.
+                          type: string
+                        workFactor:
+                          description: |-
+                            Governs the strength of the hash and the time required to compute it. Only required for BCRYPT algorithm. Minimum value is 1, and maximum is 20.
+                            Governs the strength of the hash and the time required to compute it. Only required for BCRYPT algorithm
+                          type: number
+                      type: object
+                    type: array
+                  passwordInlineHook:
+                    description: |-
+                      Specifies that a Password Import Inline Hook should be triggered to handle verification
+                      of the user's password the first time the user logs in. This allows an existing password to be imported into Okta directly
+                      from some other store. When updating a user with a password hook the user must be in the STAGED status. The password
+                      field should not be specified when using Password Import Inline Hook.
+                      When specified, the Password Inline Hook is triggered to handle verification of the end user's password the first time the user tries to sign in
+                    type: string
+                  passwordSecretRef:
+                    description: |-
+                      User password.
+                      User Password
+                    properties:
+                      key:
+                        type: string
+                      name:
+                        description: Name of the secret.
+                        type: string
+                    required:
+                    - key
+                    - name
+                    type: object
+                  postalAddress:
+                    description: |-
+                      User profile property.
+                      User mailing address
+                    type: string
+                  preferredLanguage:
+                    description: |-
+                      User profile property.
+                      User preferred language
+                    type: string
+                  primaryPhone:
+                    description: |-
+                      User profile property.
+                      User primary phone number
+                    type: string
+                  profileUrl:
+                    description: |-
+                      User profile property.
+                      User online profile (web page)
+                    type: string
+                  recoveryAnswerSecretRef:
+                    description: |-
+                      User password recovery answer.
+                      User Password Recovery Answer
+                    properties:
+                      key:
+                        type: string
+                      name:
+                        description: Name of the secret.
+                        type: string
+                    required:
+                    - key
+                    - name
+                    type: object
+                  recoveryQuestion:
+                    description: |-
+                      User password recovery question.
+                      User Password Recovery Question
+                    type: string
+                  secondEmail:
+                    description: |-
+                      User profile property.
+                      User secondary email address, used for account recovery
+                    type: string
+                  skipRoles:
+                    description: Do not populate user roles information (prevents
+                      additional API call)
+                    type: boolean
+                  state:
+                    description: |-
+                      User profile property.
+                      User state or region
+                    type: string
+                  status:
+                    description: |-
+                      User profile property. Valid values are "ACTIVE", "DEPROVISIONED", "STAGED", "SUSPENDED"
+                      The status of the User in Okta - remove to set user back to active/provisioned
+                    type: string
+                  streetAddress:
+                    description: |-
+                      User profile property.
+                      User street address
+                    type: string
+                  timezone:
+                    description: |-
+                      User profile property.
+                      User default timezone
+                    type: string
+                  title:
+                    description: |-
+                      User profile property.
+                      User title
+                    type: string
+                  userType:
+                    description: |-
+                      User profile property.
+                      User employee type
+                    type: string
+                  zipCode:
+                    description: |-
+                      User profile property.
+                      User zipcode or postal code
+                    type: string
+                type: object
+              initProvider:
+                description: |-
+                  THIS IS A BETA FIELD. It will be honored
+                  unless the Management Policies feature flag is disabled.
+                  InitProvider holds the same fields as ForProvider, with the exception
+                  of Identifier and other resource reference fields. The fields that are
+                  in InitProvider are merged into ForProvider when the resource is created.
+                  The same fields are also added to the terraform ignore_changes hook, to
+                  avoid updating them after creation. This is useful for fields that are
+                  required on creation, but we do not desire to update them after creation,
+                  for example because of an external controller is managing them, like an
+                  autoscaler.
+                properties:
+                  city:
+                    description: |-
+                      User profile property.
+                      User city
+                    type: string
+                  costCenter:
+                    description: |-
+                      User profile property.
+                      User cost center
+                    type: string
+                  countryCode:
+                    description: |-
+                      User profile property.
+                      User country code
+                    type: string
+                  customProfileAttributes:
+                    description: |-
+                      raw JSON containing all custom profile attributes.
+                      JSON formatted custom attributes for a user. It must be JSON due to various types Okta allows.
+                    type: string
+                  customProfileAttributesToIgnore:
+                    items:
+                      type: string
+                    type: array
+                    x-kubernetes-list-type: set
+                  department:
+                    description: |-
+                      User profile property.
+                      User department
+                    type: string
+                  displayName:
+                    description: |-
+                      User profile property.
+                      User display name, suitable to show end users
+                    type: string
+                  division:
+                    description: |-
+                      User profile property.
+                      User division
+                    type: string
+                  email:
+                    description: |-
+                      User profile property.
+                      User primary email address
+                    type: string
+                  employeeNumber:
+                    description: |-
+                      User profile property.
+                      User employee number
+                    type: string
+                  expirePasswordOnCreate:
+                    description: |-
+                      If set to true, the user will have to change the password at the next login. This property will be used
+                      when user is being created and works only when password field is set. Default is false.
+                      If set to `true`, the user will have to change the password at the next login. This property will be used when user is being created and works only when `password` field is set
+                    type: boolean
+                  firstName:
+                    description: |-
+                      User's First Name, required by default.
+                      User first name
+                    type: string
+                  honorificPrefix:
+                    description: |-
+                      User profile property.
+                      User honorific prefix
+                    type: string
+                  honorificSuffix:
+                    description: |-
+                      User profile property.
+                      User honorific suffix
+                    type: string
+                  lastName:
+                    description: |-
+                      User's Last Name, required by default.
+                      User last name
+                    type: string
+                  locale:
+                    description: |-
+                      User profile property.
+                      User default location
+                    type: string
+                  login:
+                    description: |-
+                      User profile property.
+                      User Okta login
+                    type: string
+                  manager:
+                    description: |-
+                      User profile property.
+                      Manager of User
+                    type: string
+                  managerId:
+                    description: |-
+                      User profile property.
+                      Manager ID of User
+                    type: string
+                  middleName:
+                    description: |-
+                      User profile property.
+                      User middle name
+                    type: string
+                  mobilePhone:
+                    description: |-
+                      User profile property.
+                      User mobile phone number
+                    type: string
+                  nickName:
+                    description: |-
+                      User profile property.
+                      User nickname
+                    type: string
+                  oldPasswordSecretRef:
+                    description: |-
+                      Old user password. IMPORTANT: Should be ONLY set in case the password was changed
+                      outside the provider. After successful password change this field should be removed and password field should be used
+                      for further changes.
+                      Old User Password. Should be only set in case the password was not changed using the provider
+                    properties:
+                      key:
+                        type: string
+                      name:
+                        description: Name of the secret.
+                        type: string
+                    required:
+                    - key
+                    - name
+                    type: object
+                  organization:
+                    description: |-
+                      User profile property.
+                      User organization
+                    type: string
+                  passwordHash:
+                    description: Specifies a hashed password to import into Okta.
+                    items:
+                      properties:
+                        algorithm:
+                          description: The algorithm used to generate the hash using
+                            the password
+                          type: string
+                        salt:
+                          description: |-
+                            Only required for salted hashes. For BCRYPT, this specifies the radix64-encoded salt used to generate
+                            the hash, which must be 22 characters long. For other salted hashes, this specifies the base64-encoded salt used to generate the hash.
+                            Only required for salted hashes
+                          type: string
+                        saltOrder:
+                          description: |-
+                            Specifies whether salt was pre- or postfixed to the password before hashing. Only required for salted algorithms.
+                            Specifies whether salt was pre- or postfixed to the password before hashing
+                          type: string
+                        value:
+                          description: |-
+                            For SHA-512, SHA-256, SHA-1, MD5, this is the actual base64-encoded hash of the password (and salt, if used).
+                            This is the Base64 encoded value of the SHA-512/SHA-256/SHA-1/MD5 digest that was computed by either pre-fixing or post-fixing
+                            the salt to the password, depending on the saltOrder. If a salt was not used in the source system, then this should just be
+                            the Base64 encoded value of the password's SHA-512/SHA-256/SHA-1/MD5 digest. For BCRYPT, This is the actual radix64-encoded hashed password.
+                            For SHA-512, SHA-256, SHA-1, MD5, This is the actual base64-encoded hash of the password (and salt, if used). This is the Base64 encoded value of the SHA-512/SHA-256/SHA-1/MD5 digest that was computed by either pre-fixing or post-fixing the salt to the password, depending on the saltOrder. If a salt was not used in the source system, then this should just be the the Base64 encoded value of the password's SHA-512/SHA-256/SHA-1/MD5 digest. For BCRYPT, This is the actual radix64-encoded hashed password.
+                          type: string
+                        workFactor:
+                          description: |-
+                            Governs the strength of the hash and the time required to compute it. Only required for BCRYPT algorithm. Minimum value is 1, and maximum is 20.
+                            Governs the strength of the hash and the time required to compute it. Only required for BCRYPT algorithm
+                          type: number
+                      type: object
+                    type: array
+                  passwordInlineHook:
+                    description: |-
+                      Specifies that a Password Import Inline Hook should be triggered to handle verification
+                      of the user's password the first time the user logs in. This allows an existing password to be imported into Okta directly
+                      from some other store. When updating a user with a password hook the user must be in the STAGED status. The password
+                      field should not be specified when using Password Import Inline Hook.
+                      When specified, the Password Inline Hook is triggered to handle verification of the end user's password the first time the user tries to sign in
+                    type: string
+                  passwordSecretRef:
+                    description: |-
+                      User password.
+                      User Password
+                    properties:
+                      key:
+                        type: string
+                      name:
+                        description: Name of the secret.
+                        type: string
+                    required:
+                    - key
+                    - name
+                    type: object
+                  postalAddress:
+                    description: |-
+                      User profile property.
+                      User mailing address
+                    type: string
+                  preferredLanguage:
+                    description: |-
+                      User profile property.
+                      User preferred language
+                    type: string
+                  primaryPhone:
+                    description: |-
+                      User profile property.
+                      User primary phone number
+                    type: string
+                  profileUrl:
+                    description: |-
+                      User profile property.
+                      User online profile (web page)
+                    type: string
+                  recoveryAnswerSecretRef:
+                    description: |-
+                      User password recovery answer.
+                      User Password Recovery Answer
+                    properties:
+                      key:
+                        type: string
+                      name:
+                        description: Name of the secret.
+                        type: string
+                    required:
+                    - key
+                    - name
+                    type: object
+                  recoveryQuestion:
+                    description: |-
+                      User password recovery question.
+                      User Password Recovery Question
+                    type: string
+                  secondEmail:
+                    description: |-
+                      User profile property.
+                      User secondary email address, used for account recovery
+                    type: string
+                  skipRoles:
+                    description: Do not populate user roles information (prevents
+                      additional API call)
+                    type: boolean
+                  state:
+                    description: |-
+                      User profile property.
+                      User state or region
+                    type: string
+                  status:
+                    description: |-
+                      User profile property. Valid values are "ACTIVE", "DEPROVISIONED", "STAGED", "SUSPENDED"
+                      The status of the User in Okta - remove to set user back to active/provisioned
+                    type: string
+                  streetAddress:
+                    description: |-
+                      User profile property.
+                      User street address
+                    type: string
+                  timezone:
+                    description: |-
+                      User profile property.
+                      User default timezone
+                    type: string
+                  title:
+                    description: |-
+                      User profile property.
+                      User title
+                    type: string
+                  userType:
+                    description: |-
+                      User profile property.
+                      User employee type
+                    type: string
+                  zipCode:
+                    description: |-
+                      User profile property.
+                      User zipcode or postal code
+                    type: string
+                type: object
+              managementPolicies:
+                default:
+                - '*'
+                description: |-
+                  THIS IS A BETA FIELD. It is on by default but can be opted out
+                  through a Crossplane feature flag.
+                  ManagementPolicies specify the array of actions Crossplane is allowed to
+                  take on the managed and external resources.
+                  See the design doc for more information: https://github.com/crossplane/crossplane/blob/499895a25d1a1a0ba1604944ef98ac7a1a71f197/design/design-doc-observe-only-resources.md?plain=1#L223
+                  and this one: https://github.com/crossplane/crossplane/blob/444267e84783136daa93568b364a5f01228cacbe/design/one-pager-ignore-changes.md
+                items:
+                  description: |-
+                    A ManagementAction represents an action that the Crossplane controllers
+                    can take on an external resource.
+                  enum:
+                  - Observe
+                  - Create
+                  - Update
+                  - Delete
+                  - LateInitialize
+                  - '*'
+                  type: string
+                type: array
+              providerConfigRef:
+                default:
+                  kind: ClusterProviderConfig
+                  name: default
+                description: |-
+                  ProviderConfigReference specifies how the provider that will be used to
+                  create, observe, update, and delete this managed resource should be
+                  configured.
+                properties:
+                  kind:
+                    description: Kind of the referenced object.
+                    type: string
+                  name:
+                    description: Name of the referenced object.
+                    type: string
+                required:
+                - kind
+                - name
+                type: object
+              writeConnectionSecretToRef:
+                description: |-
+                  WriteConnectionSecretToReference specifies the namespace and name of a
+                  Secret to which any connection details for this managed resource should
+                  be written. Connection details frequently include the endpoint, username,
+                  and password required to connect to the managed resource.
+                properties:
+                  name:
+                    description: Name of the secret.
+                    type: string
+                required:
+                - name
+                type: object
+            required:
+            - forProvider
+            type: object
+            x-kubernetes-validations:
+            - message: spec.forProvider.email is a required parameter
+              rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies
+                || ''Update'' in self.managementPolicies) || has(self.forProvider.email)
+                || (has(self.initProvider) && has(self.initProvider.email))'
+            - message: spec.forProvider.firstName is a required parameter
+              rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies
+                || ''Update'' in self.managementPolicies) || has(self.forProvider.firstName)
+                || (has(self.initProvider) && has(self.initProvider.firstName))'
+            - message: spec.forProvider.lastName is a required parameter
+              rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies
+                || ''Update'' in self.managementPolicies) || has(self.forProvider.lastName)
+                || (has(self.initProvider) && has(self.initProvider.lastName))'
+            - message: spec.forProvider.login is a required parameter
+              rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies
+                || ''Update'' in self.managementPolicies) || has(self.forProvider.login)
+                || (has(self.initProvider) && has(self.initProvider.login))'
+          status:
+            description: UserStatus defines the observed state of User.
+            properties:
+              atProvider:
+                properties:
+                  city:
+                    description: |-
+                      User profile property.
+                      User city
+                    type: string
+                  costCenter:
+                    description: |-
+                      User profile property.
+                      User cost center
+                    type: string
+                  countryCode:
+                    description: |-
+                      User profile property.
+                      User country code
+                    type: string
+                  customProfileAttributes:
+                    description: |-
+                      raw JSON containing all custom profile attributes.
+                      JSON formatted custom attributes for a user. It must be JSON due to various types Okta allows.
+                    type: string
+                  customProfileAttributesToIgnore:
+                    items:
+                      type: string
+                    type: array
+                    x-kubernetes-list-type: set
+                  department:
+                    description: |-
+                      User profile property.
+                      User department
+                    type: string
+                  displayName:
+                    description: |-
+                      User profile property.
+                      User display name, suitable to show end users
+                    type: string
+                  division:
+                    description: |-
+                      User profile property.
+                      User division
+                    type: string
+                  email:
+                    description: |-
+                      User profile property.
+                      User primary email address
+                    type: string
+                  employeeNumber:
+                    description: |-
+                      User profile property.
+                      User employee number
+                    type: string
+                  expirePasswordOnCreate:
+                    description: |-
+                      If set to true, the user will have to change the password at the next login. This property will be used
+                      when user is being created and works only when password field is set. Default is false.
+                      If set to `true`, the user will have to change the password at the next login. This property will be used when user is being created and works only when `password` field is set
+                    type: boolean
+                  firstName:
+                    description: |-
+                      User's First Name, required by default.
+                      User first name
+                    type: string
+                  honorificPrefix:
+                    description: |-
+                      User profile property.
+                      User honorific prefix
+                    type: string
+                  honorificSuffix:
+                    description: |-
+                      User profile property.
+                      User honorific suffix
+                    type: string
+                  id:
+                    description: ID of the User schema property.
+                    type: string
+                  lastName:
+                    description: |-
+                      User's Last Name, required by default.
+                      User last name
+                    type: string
+                  locale:
+                    description: |-
+                      User profile property.
+                      User default location
+                    type: string
+                  login:
+                    description: |-
+                      User profile property.
+                      User Okta login
+                    type: string
+                  manager:
+                    description: |-
+                      User profile property.
+                      Manager of User
+                    type: string
+                  managerId:
+                    description: |-
+                      User profile property.
+                      Manager ID of User
+                    type: string
+                  middleName:
+                    description: |-
+                      User profile property.
+                      User middle name
+                    type: string
+                  mobilePhone:
+                    description: |-
+                      User profile property.
+                      User mobile phone number
+                    type: string
+                  nickName:
+                    description: |-
+                      User profile property.
+                      User nickname
+                    type: string
+                  organization:
+                    description: |-
+                      User profile property.
+                      User organization
+                    type: string
+                  passwordHash:
+                    description: Specifies a hashed password to import into Okta.
+                    items:
+                      properties:
+                        algorithm:
+                          description: The algorithm used to generate the hash using
+                            the password
+                          type: string
+                        salt:
+                          description: |-
+                            Only required for salted hashes. For BCRYPT, this specifies the radix64-encoded salt used to generate
+                            the hash, which must be 22 characters long. For other salted hashes, this specifies the base64-encoded salt used to generate the hash.
+                            Only required for salted hashes
+                          type: string
+                        saltOrder:
+                          description: |-
+                            Specifies whether salt was pre- or postfixed to the password before hashing. Only required for salted algorithms.
+                            Specifies whether salt was pre- or postfixed to the password before hashing
+                          type: string
+                        value:
+                          description: |-
+                            For SHA-512, SHA-256, SHA-1, MD5, this is the actual base64-encoded hash of the password (and salt, if used).
+                            This is the Base64 encoded value of the SHA-512/SHA-256/SHA-1/MD5 digest that was computed by either pre-fixing or post-fixing
+                            the salt to the password, depending on the saltOrder. If a salt was not used in the source system, then this should just be
+                            the Base64 encoded value of the password's SHA-512/SHA-256/SHA-1/MD5 digest. For BCRYPT, This is the actual radix64-encoded hashed password.
+                            For SHA-512, SHA-256, SHA-1, MD5, This is the actual base64-encoded hash of the password (and salt, if used). This is the Base64 encoded value of the SHA-512/SHA-256/SHA-1/MD5 digest that was computed by either pre-fixing or post-fixing the salt to the password, depending on the saltOrder. If a salt was not used in the source system, then this should just be the the Base64 encoded value of the password's SHA-512/SHA-256/SHA-1/MD5 digest. For BCRYPT, This is the actual radix64-encoded hashed password.
+                          type: string
+                        workFactor:
+                          description: |-
+                            Governs the strength of the hash and the time required to compute it. Only required for BCRYPT algorithm. Minimum value is 1, and maximum is 20.
+                            Governs the strength of the hash and the time required to compute it. Only required for BCRYPT algorithm
+                          type: number
+                      type: object
+                    type: array
+                  passwordInlineHook:
+                    description: |-
+                      Specifies that a Password Import Inline Hook should be triggered to handle verification
+                      of the user's password the first time the user logs in. This allows an existing password to be imported into Okta directly
+                      from some other store. When updating a user with a password hook the user must be in the STAGED status. The password
+                      field should not be specified when using Password Import Inline Hook.
+                      When specified, the Password Inline Hook is triggered to handle verification of the end user's password the first time the user tries to sign in
+                    type: string
+                  postalAddress:
+                    description: |-
+                      User profile property.
+                      User mailing address
+                    type: string
+                  preferredLanguage:
+                    description: |-
+                      User profile property.
+                      User preferred language
+                    type: string
+                  primaryPhone:
+                    description: |-
+                      User profile property.
+                      User primary phone number
+                    type: string
+                  profileUrl:
+                    description: |-
+                      User profile property.
+                      User online profile (web page)
+                    type: string
+                  rawStatus:
+                    description: |-
+                      User profile property. Valid values are "ACTIVE", "DEPROVISIONED", "STAGED", "SUSPENDED"
+                      The raw status of the User in Okta - (status is mapped)
+                    type: string
+                  recoveryQuestion:
+                    description: |-
+                      User password recovery question.
+                      User Password Recovery Question
+                    type: string
+                  secondEmail:
+                    description: |-
+                      User profile property.
+                      User secondary email address, used for account recovery
+                    type: string
+                  skipRoles:
+                    description: Do not populate user roles information (prevents
+                      additional API call)
+                    type: boolean
+                  state:
+                    description: |-
+                      User profile property.
+                      User state or region
+                    type: string
+                  status:
+                    description: |-
+                      User profile property. Valid values are "ACTIVE", "DEPROVISIONED", "STAGED", "SUSPENDED"
+                      The status of the User in Okta - remove to set user back to active/provisioned
+                    type: string
+                  streetAddress:
+                    description: |-
+                      User profile property.
+                      User street address
+                    type: string
+                  timezone:
+                    description: |-
+                      User profile property.
+                      User default timezone
+                    type: string
+                  title:
+                    description: |-
+                      User profile property.
+                      User title
+                    type: string
+                  userType:
+                    description: |-
+                      User profile property.
+                      User employee type
+                    type: string
+                  zipCode:
+                    description: |-
+                      User profile property.
+                      User zipcode or postal code
+                    type: string
+                type: object
+              conditions:
+                description: Conditions of the resource.
+                items:
+                  description: A Condition that may apply to a resource.
+                  properties:
+                    lastTransitionTime:
+                      description: |-
+                        LastTransitionTime is the last time this condition transitioned from one
+                        status to another.
+                      format: date-time
+                      type: string
+                    message:
+                      description: |-
+                        A Message containing details about this condition's last transition from
+                        one status to another, if any.
+                      type: string
+                    observedGeneration:
+                      description: |-
+                        ObservedGeneration represents the .metadata.generation that the condition was set based upon.
+                        For instance, if .metadata.generation is currently 12, but the .status.conditions[x].observedGeneration is 9, the condition is out of date
+                        with respect to the current state of the instance.
+                      format: int64
+                      type: integer
+                    reason:
+                      description: A Reason for this condition's last transition from
+                        one status to another.
+                      type: string
+                    status:
+                      description: Status of this condition; is it currently True,
+                        False, or Unknown?
+                      type: string
+                    type:
+                      description: |-
+                        Type of this condition. At most one of each condition type may apply to
+                        a resource at any point in time.
+                      type: string
+                  required:
+                  - lastTransitionTime
+                  - reason
+                  - status
+                  - type
+                  type: object
+                type: array
+                x-kubernetes-list-map-keys:
+                - type
+                x-kubernetes-list-type: map
+              lastHandledReconcileAt:
+                description: |-
+                  LastHandledReconcileAt holds the value of the most recent
+                  reconcile-requested-at annotation token that the controller has
+                  processed. Users can compare this to the annotation to determine
+                  whether a reconcile request has been handled.
+                type: string
+              observedGeneration:
+                description: |-
+                  ObservedGeneration is the latest metadata.generation
+                  which resulted in either a ready state, or stalled due to error
+                  it can not recover from without human intervention.
+                format: int64
+                type: integer
+            type: object
+        required:
+        - spec
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

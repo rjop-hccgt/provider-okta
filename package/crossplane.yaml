@@ -15,3 +15,6 @@ metadata:
       - Okta Groups
       - Assigning Users to Groups
       - Assigning Apps to Groups
+spec:
+  capabilities:
+    - SafeStart
